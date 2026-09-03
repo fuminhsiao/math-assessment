@@ -1,1 +1,6 @@
 Django==5.2.16
+gunicorn
+uvicorn
+whitenoise[brotli]
+dj-database-url
+psycopg2-binary
