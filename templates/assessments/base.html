@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Math Assessment Demo{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'assessments/css/app.css' %}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<header class="topbar">
+  <div class="container nav">
+    <a href="{% url 'home' %}" class="brand">Math Assessment Demo</a>
+    <nav class="nav-links">
+      <a href="{% url 'home' %}">Teacher Home</a>
+      <a href="{% url 'teacher_create_set' %}">Create Assessment</a>
+      <a href="/admin/">Admin</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+  {% for message in messages %}<div class="message">{{ message }}</div>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

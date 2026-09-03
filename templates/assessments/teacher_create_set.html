@@ -1,0 +1,98 @@
+{% extends 'assessments/base.html' %}
+{% block title %}Create a Question Set{% endblock %}
+{% block content %}
+<section class="teacher-builder card">
+  <div class="teacher-builder-header">
+    <div>
+      <p class="eyebrow">Teacher Portal</p>
+      <h1>Create a Question Set</h1>
+      <p>Choose a question type, then select questions from the question bank.</p>
+    </div>
+    <div class="selected-summary"><strong id="selected-count">0</strong><span>Selected</span></div>
+  </div>
+
+  <form method="post" id="question-set-form">{% csrf_token %}
+    <div class="builder-controls">
+      <div class="field title-field">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+        {{ form.title.errors }}
+      </div>
+      <div class="field type-field">
+        <label for="question-type-filter">Question Type</label>
+        <select id="question-type-filter">
+          <option value="all">All Question Types</option>
+          <option value="mathlive">MathLive Response</option>
+          <option value="multiple_choice">Multiple Choice</option>
+          <option value="drag_drop_image">Drag and Drop on Image</option>
+        </select>
+      </div>
+    </div>
+
+    {{ form.questions.errors }}
+    <div class="teacher-question-list" id="question-list">
+      {% for question in form.fields.questions.queryset %}
+        <label class="teacher-question-card" data-question-type="{{ question.question_type }}">
+          <input type="checkbox" name="questions" value="{{ question.id }}"
+            {% if question.id|stringformat:'s' in form.questions.value %}checked{% endif %}>
+          <div class="teacher-question-content">
+            <div class="teacher-question-meta">
+              <span>Question {{ forloop.counter }}</span>
+              <span class="type-badge type-{{ question.question_type }}">{{ question.get_question_type_display }}</span>
+            </div>
+            <div class="teacher-question-prompt">{{ question.prompt }}</div>
+            {% if question.question_type == 'multiple_choice' %}
+              <div class="choice-preview">
+                {% for choice in question.choices.all %}<span>{{ choice.text }}</span>{% endfor %}
+              </div>
+            {% elif question.question_type == 'drag_drop_image' %}
+              <div class="response-preview">Student drags answer choices onto fixed locations in an image.</div>
+            {% else %}
+              <div class="response-preview">Student enters a mathematical response.</div>
+            {% endif %}
+          </div>
+        </label>
+      {% empty %}
+        <div class="empty-state">No questions are available. Run <code>python manage.py seed_demo</code>.</div>
+      {% endfor %}
+    </div>
+
+    <div class="teacher-builder-footer">
+      <span><strong id="footer-selected-count">0</strong> questions selected</span>
+      <button type="submit">Save and Create Student Page</button>
+    </div>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  const filter = document.getElementById('question-type-filter');
+  const cards = Array.from(document.querySelectorAll('.teacher-question-card'));
+  const checkboxes = Array.from(document.querySelectorAll('input[name="questions"]'));
+  const selectedCount = document.getElementById('selected-count');
+  const footerSelectedCount = document.getElementById('footer-selected-count');
+
+  function updateCards() {
+    const selectedType = filter.value;
+    cards.forEach((card) => {
+      const visible = selectedType === 'all' || card.dataset.questionType === selectedType;
+      card.hidden = !visible;
+    });
+  }
+
+  function updateCount() {
+    const count = checkboxes.filter((box) => box.checked).length;
+    selectedCount.textContent = count;
+    footerSelectedCount.textContent = count;
+    cards.forEach((card) => {
+      const box = card.querySelector('input[type="checkbox"]');
+      card.classList.toggle('selected', box.checked);
+    });
+  }
+
+  filter.addEventListener('change', updateCards);
+  checkboxes.forEach((box) => box.addEventListener('change', updateCount));
+  updateCards();
+  updateCount();
+</script>
+{% endblock %}

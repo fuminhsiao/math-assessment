@@ -1,0 +1,8 @@
+{% extends 'assessments/base.html' %}
+{% block title %}Submission Result{% endblock %}
+{% block content %}
+<section class="card"><p class="eyebrow">Submission Saved</p><h1>{{ submission.student_name }}: {{ score }} / {{ total }}</h1>
+<p>Submitted at: {{ submission.submitted_at }}</p>
+{% for answer in answers %}<article class="result-row {% if answer.is_correct %}correct{% else %}incorrect{% endif %}"><strong>{{ answer.question.prompt }}</strong><div>Your answer: {{ answer.answer_text }}</div><div>{% if answer.is_correct %}Correct{% else %}Incorrect{% endif %}</div></article>{% endfor %}
+</section>
+{% endblock %}

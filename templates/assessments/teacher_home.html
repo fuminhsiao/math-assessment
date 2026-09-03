@@ -1,0 +1,45 @@
+{% extends 'assessments/base.html' %}
+{% block title %}Teacher Home{% endblock %}
+{% block content %}
+<section class="teacher-dashboard">
+  <div class="dashboard-header">
+    <div>
+      <p class="eyebrow">Teacher Portal</p>
+      <h1>Your Assessments</h1>
+      <p>Open an assessment to view student submissions and results.</p>
+    </div>
+    <a class="button-link" href="{% url 'teacher_create_set' %}">Create New Assessment</a>
+  </div>
+
+  {% if question_sets %}
+    <div class="assessment-grid">
+      {% for question_set in question_sets %}
+        <article class="assessment-card">
+          <a class="assessment-card-main" href="{% url 'teacher_set_results' question_set.public_id %}">
+            <div class="assessment-card-top">
+              <span class="assessment-icon">A</span>
+              <span class="assessment-date">{{ question_set.created_at|date:"M j, Y" }}</span>
+            </div>
+            <h2>{{ question_set.title }}</h2>
+            <div class="assessment-stats">
+              <span><strong>{{ question_set.question_count }}</strong> question{{ question_set.question_count|pluralize }}</span>
+              <span><strong>{{ question_set.submission_count }}</strong> submission{{ question_set.submission_count|pluralize }}</span>
+            </div>
+            <span class="view-results-label">View Results →</span>
+          </a>
+          <div class="assessment-card-actions">
+            <a href="{% url 'student_take_set' question_set.public_id %}" target="_blank" rel="noopener">Open Student Page</a>
+            <a href="{% url 'teacher_set_created' question_set.public_id %}">Share Link</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card empty-dashboard">
+      <h2>No assessments yet</h2>
+      <p>Create your first assessment by selecting questions from the question bank.</p>
+      <a class="button-link" href="{% url 'teacher_create_set' %}">Create Assessment</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

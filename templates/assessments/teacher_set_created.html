@@ -1,0 +1,9 @@
+{% extends 'assessments/base.html' %}
+{% block title %}Question Set Created{% endblock %}
+{% block content %}
+<section class="card"><p class="eyebrow">Created Successfully</p><h1>{{ question_set.title }}</h1>
+<p>The student page is ready. Copy this URL and send it to students:</p>
+<div class="share-row"><input id="student-url" value="{{ student_url }}" readonly><button type="button" onclick="navigator.clipboard.writeText(document.getElementById('student-url').value)">Copy</button></div>
+<p><a class="button-link" href="{% url 'student_take_set' question_set.public_id %}">Open Student Page</a></p>
+<p><a class="button-link" href="{% url 'teacher_set_results' question_set.public_id %}">View Student Results</a></p></section>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'assessments/base.html' %}
+{% block title %}Results: {{ question_set.title }}{% endblock %}
+{% block content %}
+<section class="card teacher-results">
+  <div class="results-header">
+    <div>
+      <p class="eyebrow">Teacher Results</p>
+      <h1>{{ question_set.title }}</h1>
+      <p>{{ rows|length }} submission{{ rows|length|pluralize }}</p>
+    </div>
+    <a class="button-link" href="{% url 'teacher_set_created' question_set.public_id %}">Back to Question Set</a>
+  </div>
+
+  {% if rows %}
+    <div class="results-list">
+      {% for row in rows %}
+        <details class="student-result-card">
+          <summary>
+            <span>
+              <strong>{{ row.submission.student_name }}</strong>
+              <small>{{ row.submission.submitted_at }}</small>
+            </span>
+            <span class="score-pill">{{ row.score }} / {{ row.total }}</span>
+          </summary>
+          <div class="student-answer-list">
+            {% for answer in row.answers %}
+              <article class="result-row {% if answer.is_correct %}correct{% else %}incorrect{% endif %}">
+                <strong>{{ answer.question.prompt }}</strong>
+                <div>Student answer: {{ answer.answer_text|default:"No answer" }}</div>
+                <div>{% if answer.is_correct %}Correct{% else %}Incorrect{% endif %}</div>
+              </article>
+            {% endfor %}
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">No students have submitted this assessment yet.</div>
+  {% endif %}
+</section>
+{% endblock %}
