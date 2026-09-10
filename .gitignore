@@ -1,5 +1,23 @@
+# Python
 __pycache__/
 *.py[cod]
-db.sqlite3
+*.pyo
+
+# Virtual environments
 .venv/
+venv/
+
+# Environment variables / secrets
 .env
+.env.*
+
+# Django local database and generated files
+db.sqlite3
+*.log
+staticfiles/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

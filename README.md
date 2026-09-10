@@ -78,3 +78,29 @@ The seed command creates **Coordinate Quadrants – Drag and Drop**, matching th
 ## Coordinate quadrant drag-and-drop
 
 The coordinate-plane demonstration uses the four full quadrants as drop zones. Students may drag each ordered pair anywhere within the correct quadrant. Clicking an answer and then clicking a quadrant is also supported.
+
+## Render deployment
+
+This project is prepared for Render while continuing to work locally with SQLite.
+
+### Render resources
+1. Create a **Render Postgres** database.
+2. Create a **Web Service** connected to this GitHub repository.
+3. Set the Build Command to:
+
+```bash
+./build.sh
+```
+
+4. Set the Start Command to:
+
+```bash
+python -m gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker
+```
+
+5. Add these environment variables in the Render Web Service:
+   - `DATABASE_URL`: use the **Internal Database URL** from Render Postgres.
+   - `DJANGO_SECRET_KEY`: generate a long random secret value.
+   - `WEB_CONCURRENCY`: `4`
+
+The app automatically uses SQLite locally when `DATABASE_URL` is absent and PostgreSQL on Render when `DATABASE_URL` is configured. ngrok hosts and CSRF origins remain enabled for local external testing.
