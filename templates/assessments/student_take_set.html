@@ -1,147 +1,130 @@
 {% extends 'assessments/base.html' %}
 {% load assessment_extras static %}
-{% block title %}{{ question_set.title }}{% endblock %}
-{% block body_class %}exam-page{% endblock %}
+
+{% block title %}Mathematics Grade 6 Sample Items{% endblock %}
+{% block body_class %}exam-page mstep-body{% endblock %}
+
 {% block content %}
-<section class="exam-shell" data-total="{{ items|length }}">
-  <header class="exam-header">
-    <div class="exam-brand">
-      <span class="exam-brand-mark">M</span>
-      <div>
-        <strong>{{ question_set.title }}</strong>
-        <span>Student Assessment</span>
+<section class="mstep-exam" data-total="{{ items|length }}">
+  <div class="mstep-frame">
+    <header class="mstep-titlebar">
+      <div class="mstep-title-copy">
+        <div class="mstep-title">Mathematics Grade 6 Sample Items</div>
+        <div class="mstep-subtitle">Training Student</div>
+      </div>
+
+      <button type="button" class="mstep-exit" id="exit-test-button" aria-label="Exit test" title="Exit Test">
+        <span aria-hidden="true">×</span>
+      </button>
+    </header>
+
+    <div class="mstep-question-strip" id="question-strip">Question: 1</div>
+
+    <div class="mstep-toolbar-row">
+      <div class="mstep-nav-buttons" aria-label="Question navigation">
+        <button type="button" class="mstep-arrow-button" id="back-button" aria-label="Previous question" title="Previous question">
+          <span aria-hidden="true">←</span>
+        </button>
+        <button type="button" class="mstep-arrow-button" id="next-button" aria-label="Next question" title="Next question">
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+
+      <div class="mstep-toolbox" aria-label="Assessment tools">
+        <span class="mstep-tool-placeholder"></span>
+        <span class="mstep-tool-placeholder"></span>
+        <span class="mstep-tool-placeholder"></span>
+        <span class="mstep-tool-placeholder"></span>
+        <span class="mstep-tool-placeholder"></span>
       </div>
     </div>
-    <div class="exam-header-actions">
-      <button type="button" class="icon-button" id="help-button" aria-label="Help">?</button>
-      <button type="button" class="icon-button" id="fullscreen-button" aria-label="Full screen">⛶</button>
-    </div>
-  </header>
 
-  <div class="exam-progress-wrap">
-    <div class="exam-progress-copy">
-      <span id="progress-label">Getting started</span>
-      <span id="progress-count">0 of {{ items|length }}</span>
-    </div>
-    <div class="exam-progress-track" aria-hidden="true">
-      <div class="exam-progress-fill" id="progress-fill"></div>
-    </div>
-  </div>
+    <form method="post" id="quiz-form" novalidate>
+      {% csrf_token %}
 
-  <form method="post" id="quiz-form" novalidate>
-    {% csrf_token %}
-
-    <section class="exam-screen active" data-screen="intro">
-      <div class="intro-card">
-        <div class="intro-icon">✓</div>
-        <p class="exam-kicker">Ready to begin?</p>
-        <h1>{{ question_set.title }}</h1>
-        <p class="intro-description">Enter your name, then complete one question at a time. Your work is saved on this page until you submit the assessment.</p>
-        <div class="field intro-name-field">
+      <div class="mstep-name-overlay" id="name-overlay">
+        <div class="mstep-name-card">
+          <h1>Student Information</h1>
+          <p>Enter your name to begin the assessment.</p>
           <label for="student_name">Student name</label>
           <input id="student_name" name="student_name" autocomplete="name" placeholder="Enter your full name" value="{{ request.POST.student_name }}">
           <p class="inline-error" id="name-error" hidden>Please enter your name before starting.</p>
+          <button type="button" class="mstep-start-button" id="start-button">Start Assessment</button>
         </div>
-        <button type="button" class="primary-action start-button" id="start-button">Start Assessment <span>→</span></button>
       </div>
-    </section>
 
-    {% for item in items %}{% with q=item.question %}
-      <section class="exam-screen question-screen{% if q.question_type == 'drag_drop_image' %} drag-question-screen{% endif %}" data-screen="question" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="true">
-        <div class="question-layout">
-          <aside class="question-sidebar">
-            <div class="question-number-badge">{{ forloop.counter }}</div>
-            <div class="question-sidebar-copy">
-              <strong>Question {{ forloop.counter }}</strong>
-              <span>of {{ items|length }}</span>
-            </div>
-          </aside>
+      <div class="mstep-content-area">
+        {% for item in items %}{% with q=item.question %}
+          <section class="mstep-question-screen{% if forloop.first %} active{% endif %}" data-screen="question" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
+            <div class="mstep-question-box">
+              <div class="mstep-question-prompt">{{ q.prompt }}</div>
 
-          <article class="question-workspace">
-            <div class="question-type-label">
-              {% if q.question_type == 'mathlive' %}Enter your answer{% elif q.question_type == 'drag_drop_image' %}{% else %}Select one answer{% endif %}
-            </div>
-            <h2 class="question-prompt">{{ q.prompt }}</h2>
-
-            {% if q.question_type == 'drag_drop_image' %}
-              <div class="mtest-drag-question" data-drag-question="{{ q.id }}">
-                <div class="mtest-image-stage coordinate-quadrant-stage" aria-label="Coordinate plane with four drop zones">
-                  <img src="{% static q.drag_config.image %}" alt="Coordinate plane">
-
-                  <div class="mtest-drop-zone coordinate-quadrant quadrant-2"
-                       data-zone-id="q2" aria-label="Quadrant II"></div>
-                  <div class="mtest-drop-zone coordinate-quadrant quadrant-1"
-                       data-zone-id="q1" aria-label="Quadrant I"></div>
-                  <div class="mtest-drop-zone coordinate-quadrant quadrant-3"
-                       data-zone-id="q3" aria-label="Quadrant III"></div>
-                  <div class="mtest-drop-zone coordinate-quadrant quadrant-4"
-                       data-zone-id="q4" aria-label="Quadrant IV"></div>
-                </div>
-                <div class="mtest-choice-bank">
-                  {% for choice in q.drag_config.choices %}
-                    <button type="button" class="mtest-drag-choice" draggable="true" data-choice-id="{{ choice.id }}">{{ choice.label }}</button>
+              {% if q.question_type == 'multiple_choice' %}
+                <div class="mstep-options" role="radiogroup" aria-label="Answer choices">
+                  {% for choice in q.choices.all %}
+                    <label class="mstep-option-row">
+                      <input type="radio" name="answer_{{ q.id }}" value="{{ choice.value }}" {% if request.POST|get_item:q.id == choice.value %}checked{% endif %}>
+                      <span class="mstep-option-letter">{{ forloop.counter|letter_label }}</span>
+                      <span class="mstep-option-text">{{ choice.text }}</span>
+                    </label>
                   {% endfor %}
                 </div>
-                <input type="hidden" name="answer_{{ q.id }}" id="answer-{{ q.id }}" value="{{ request.POST|get_item:q.id }}">
-              </div>
-            {% elif q.question_type == 'mathlive' %}
-              <div class="answer-panel math-answer-panel">
-                <label class="answer-label" for="math-field-{{ q.id }}">Answer</label>
-                <math-field
-                  id="math-field-{{ q.id }}"
-                  class="mathlive-field"
-                  virtual-keyboard-mode="onfocus"
-                  aria-label="Answer for question {{ forloop.counter }}"
-                >{{ request.POST|get_item:q.id }}</math-field>
-                <input type="hidden" name="answer_{{ q.id }}" id="answer-{{ q.id }}" value="{{ request.POST|get_item:q.id }}">
-                <p class="answer-help">Use the math keyboard for fractions, exponents, roots, and other symbols.</p>
-              </div>
-            {% else %}
-              <div class="choices answer-panel" role="radiogroup" aria-label="Answer choices">
-                {% for choice in q.choices.all %}
-                  <label class="choice-card">
-                    <input type="radio" name="answer_{{ q.id }}" value="{{ choice.value }}"
-                      {% if request.POST|get_item:q.id == choice.value %}checked{% endif %}>
-                    <span class="choice-indicator"></span>
-                    <span class="choice-text">{{ choice.text }}</span>
-                  </label>
-                {% endfor %}
-              </div>
-            {% endif %}
-            <p class="inline-error question-error" hidden>Please provide an answer before continuing.</p>
-          </article>
-        </div>
-      </section>
-    {% endwith %}{% endfor %}
 
-    <section class="exam-screen confirmation-screen" data-screen="confirmation" aria-hidden="true">
-      <div class="confirmation-card">
-        <div class="intro-icon">✓</div>
-        <p class="exam-kicker">Ready to submit?</p>
-        <h1>Review and submit your assessment</h1>
-        <p>You have answered all {{ items|length }} questions. Select <strong>Back</strong> to review your last answer or <strong>Submit Assessment</strong> to finish.</p>
-        <div class="confirmation-summary">
-          <span>Student</span><strong id="confirmation-student-name"></strong>
-          <span>Assessment</span><strong>{{ question_set.title }}</strong>
-          <span>Questions answered</span><strong>{{ items|length }} of {{ items|length }}</strong>
-        </div>
+              {% elif q.question_type == 'mathlive' %}
+                <div class="mstep-math-answer">
+                  <math-field
+                    id="math-field-{{ q.id }}"
+                    class="mathlive-field mstep-math-field"
+                    virtual-keyboard-mode="onfocus"
+                    aria-label="Answer for question {{ forloop.counter }}"
+                  >{{ request.POST|get_item:q.id }}</math-field>
+                  <input type="hidden" name="answer_{{ q.id }}" id="answer-{{ q.id }}" value="{{ request.POST|get_item:q.id }}">
+                </div>
+
+              {% elif q.question_type == 'drag_drop_image' %}
+                <div class="mtest-drag-question" data-drag-question="{{ q.id }}">
+                  <div class="mtest-image-stage coordinate-quadrant-stage" aria-label="Coordinate plane with four drop zones">
+                    <img src="{% static q.drag_config.image %}" alt="Coordinate plane">
+                    <div class="mtest-drop-zone coordinate-quadrant quadrant-2" data-zone-id="q2" aria-label="Quadrant II"></div>
+                    <div class="mtest-drop-zone coordinate-quadrant quadrant-1" data-zone-id="q1" aria-label="Quadrant I"></div>
+                    <div class="mtest-drop-zone coordinate-quadrant quadrant-3" data-zone-id="q3" aria-label="Quadrant III"></div>
+                    <div class="mtest-drop-zone coordinate-quadrant quadrant-4" data-zone-id="q4" aria-label="Quadrant IV"></div>
+                  </div>
+                  <div class="mtest-choice-bank">
+                    {% for choice in q.drag_config.choices %}
+                      <button type="button" class="mtest-drag-choice" data-choice-id="{{ choice.id }}">{{ choice.label }}</button>
+                    {% endfor %}
+                  </div>
+                  <input type="hidden" name="answer_{{ q.id }}" id="answer-{{ q.id }}" value="{{ request.POST|get_item:q.id }}">
+                </div>
+              {% endif %}
+
+              <p class="inline-error question-error" hidden>Please provide an answer before continuing.</p>
+            </div>
+          </section>
+        {% endwith %}{% endfor %}
+
+        <section class="mstep-question-screen mstep-confirmation" data-screen="confirmation" aria-hidden="true">
+          <div class="mstep-question-box">
+            <h2>Review and Submit</h2>
+            <p>You have reached the end of the assessment.</p>
+            <p>Use the previous arrow to review your last answer, or submit your assessment now.</p>
+            <button type="submit" class="mstep-submit-button" id="submit-button">Submit Assessment</button>
+          </div>
+        </section>
       </div>
-    </section>
-
-    <footer class="exam-footer" hidden>
-      <button type="button" class="secondary-action" id="back-button">← Back</button>
-      <div class="footer-status" id="footer-status">Question 1 of {{ items|length }}</div>
-      <button type="button" class="primary-action" id="next-button">Next <span>→</span></button>
-      <button type="submit" class="primary-action submit-action" id="submit-button" hidden>Submit Assessment <span>✓</span></button>
-    </footer>
-  </form>
+    </form>
+  </div>
 </section>
 
-<div class="help-dialog" id="help-dialog" hidden>
-  <div class="help-dialog-card" role="dialog" aria-modal="true" aria-labelledby="help-title">
-    <button type="button" class="dialog-close" id="help-close" aria-label="Close">×</button>
-    <h2 id="help-title">Assessment help</h2>
-    <p>Complete the current question, then select <strong>Next</strong>. Use <strong>Back</strong> to review an earlier answer. Your assessment is submitted only after the final question.</p>
+<div class="mstep-exit-dialog" id="exit-dialog" hidden>
+  <div class="mstep-exit-card" role="dialog" aria-modal="true" aria-labelledby="exit-title">
+    <h2 id="exit-title">Exit Test?</h2>
+    <p>Your answers will not be submitted.</p>
+    <div class="mstep-exit-actions">
+      <button type="button" class="mstep-dialog-secondary" id="cancel-exit">Cancel</button>
+      <button type="button" class="mstep-dialog-primary" id="confirm-exit">Exit Test</button>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -150,23 +133,19 @@
 <script>
 (() => {
   const form = document.getElementById('quiz-form');
-  const introScreen = document.querySelector('[data-screen="intro"]');
   const questionScreens = [...document.querySelectorAll('[data-screen="question"]')];
   const confirmationScreen = document.querySelector('[data-screen="confirmation"]');
   const total = questionScreens.length;
-  const footer = document.querySelector('.exam-footer');
-  const startButton = document.getElementById('start-button');
-  const nextButton = document.getElementById('next-button');
+  const questionStrip = document.getElementById('question-strip');
   const backButton = document.getElementById('back-button');
+  const nextButton = document.getElementById('next-button');
   const submitButton = document.getElementById('submit-button');
+  const startButton = document.getElementById('start-button');
   const nameInput = document.getElementById('student_name');
   const nameError = document.getElementById('name-error');
-  const progressLabel = document.getElementById('progress-label');
-  const progressCount = document.getElementById('progress-count');
-  const progressFill = document.getElementById('progress-fill');
-  const footerStatus = document.getElementById('footer-status');
-  const confirmationStudentName = document.getElementById('confirmation-student-name');
-  let currentIndex = -1;
+  const nameOverlay = document.getElementById('name-overlay');
+  let currentIndex = 0;
+  let started = false;
 
   function initializeMathFields() {
     document.querySelectorAll('math-field.mathlive-field').forEach((field) => {
@@ -177,55 +156,32 @@
       field.mathVirtualKeyboardPolicy = 'auto';
       field.smartFence = true;
       field.smartMode = true;
-      const syncAnswer = () => { hiddenInput.value = field.value || field.textContent || ''; };
+      const syncAnswer = () => {
+        hiddenInput.value = field.value || field.textContent || '';
+      };
       field.addEventListener('input', syncAnswer);
       field.addEventListener('change', syncAnswer);
       syncAnswer();
     });
   }
+
   initializeMathFields();
   window.addEventListener('mathlive-ready', initializeMathFields);
 
-  function updateProgress() {
-    if (currentIndex < 0) {
-      progressLabel.textContent = 'Getting started';
-      progressCount.textContent = `0 of ${total}`;
-      progressFill.style.width = '0%';
-      return;
-    }
-    if (currentIndex === total) {
-      progressLabel.textContent = 'Review and submit';
-      progressCount.textContent = `${total} of ${total}`;
-      progressFill.style.width = '100%';
-      footerStatus.textContent = 'Confirmation';
-      backButton.disabled = false;
-      nextButton.hidden = true;
-      submitButton.hidden = false;
-      return;
-    }
-    const questionNumber = currentIndex + 1;
-    progressLabel.textContent = `Question ${questionNumber}`;
-    progressCount.textContent = `${questionNumber} of ${total}`;
-    progressFill.style.width = `${(questionNumber / total) * 100}%`;
-    footerStatus.textContent = `Question ${questionNumber} of ${total}`;
-    backButton.disabled = currentIndex === 0;
-    nextButton.hidden = false;
-    submitButton.hidden = true;
-  }
-
   function showQuestion(index) {
-    introScreen.classList.remove('active');
-    introScreen.setAttribute('aria-hidden', 'true');
     confirmationScreen.classList.remove('active');
     confirmationScreen.setAttribute('aria-hidden', 'true');
+
     questionScreens.forEach((screen, i) => {
       const active = i === index;
       screen.classList.toggle('active', active);
       screen.setAttribute('aria-hidden', active ? 'false' : 'true');
     });
+
     currentIndex = index;
-    footer.hidden = false;
-    updateProgress();
+    questionStrip.textContent = `Question: ${index + 1}`;
+    backButton.disabled = index === 0;
+    nextButton.disabled = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -234,22 +190,24 @@
       screen.classList.remove('active');
       screen.setAttribute('aria-hidden', 'true');
     });
-    confirmationStudentName.textContent = nameInput.value.trim();
     confirmationScreen.classList.add('active');
     confirmationScreen.setAttribute('aria-hidden', 'false');
     currentIndex = total;
-    footer.hidden = false;
-    updateProgress();
+    questionStrip.textContent = 'Review and Submit';
+    backButton.disabled = false;
+    nextButton.disabled = true;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function currentAnswerIsComplete() {
+    if (currentIndex >= total) return true;
     const screen = questionScreens[currentIndex];
     const error = screen.querySelector('.question-error');
     const hidden = screen.querySelector('input[type="hidden"][name^="answer_"]');
     const radio = screen.querySelector('input[type="radio"]:checked');
     const dragQuestion = screen.querySelector('[data-drag-question]');
     let complete = false;
+
     if (dragQuestion) {
       let placements = {};
       try { placements = JSON.parse(hidden?.value || '{}'); } catch (_) {}
@@ -257,7 +215,8 @@
     } else {
       complete = hidden ? hidden.value.trim() !== '' : Boolean(radio);
     }
-    error.hidden = complete;
+
+    if (error) error.hidden = complete;
     return complete;
   }
 
@@ -268,21 +227,35 @@
       return;
     }
     nameError.hidden = true;
+    nameOverlay.hidden = true;
+    started = true;
     showQuestion(0);
   });
-  nameInput.addEventListener('input', () => { if (nameInput.value.trim()) nameError.hidden = true; });
-  nameInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') { event.preventDefault(); startButton.click(); }
+
+  nameInput.addEventListener('input', () => {
+    if (nameInput.value.trim()) nameError.hidden = true;
   });
+
+  nameInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      startButton.click();
+    }
+  });
+
   nextButton.addEventListener('click', () => {
+    if (!started || currentIndex >= total) return;
     if (!currentAnswerIsComplete()) return;
     if (currentIndex === total - 1) showConfirmation();
     else showQuestion(currentIndex + 1);
   });
+
   backButton.addEventListener('click', () => {
+    if (!started) return;
     if (currentIndex === total) showQuestion(total - 1);
     else if (currentIndex > 0) showQuestion(currentIndex - 1);
   });
+
   form.addEventListener('submit', (event) => {
     initializeMathFields();
     document.querySelectorAll('math-field.mathlive-field').forEach((field) => {
@@ -293,86 +266,70 @@
     if (!nameInput.value.trim() || currentIndex !== total) event.preventDefault();
   });
 
+  document.querySelectorAll('.mstep-option-row input').forEach((input) => {
+    input.addEventListener('change', () => {
+      const error = input.closest('.mstep-question-box')?.querySelector('.question-error');
+      if (error) error.hidden = true;
+    });
+  });
+
+  // Coordinate-plane drag and drop is preserved for the existing third question type.
   document.querySelectorAll('[data-drag-question]').forEach((question) => {
     const hidden = question.querySelector('input[type="hidden"]');
     const bank = question.querySelector('.mtest-choice-bank');
     const choices = [...question.querySelectorAll('.mtest-drag-choice')];
     const zones = [...question.querySelectorAll('.mtest-drop-zone')];
-
-    let selected = null;
     let placements = {};
+    let selected = null;
     let pointerDrag = null;
 
-    try {
-      placements = JSON.parse(hidden.value || '{}');
-    } catch (_) {
-      placements = {};
-    }
+    try { placements = JSON.parse(hidden.value || '{}'); } catch (_) { placements = {}; }
 
-    function sync() {
-      hidden.value = Object.keys(placements).length
-        ? JSON.stringify(placements)
-        : '';
-
+    const sync = () => {
+      hidden.value = Object.keys(placements).length ? JSON.stringify(placements) : '';
       if (hidden.value) {
-        const error = question.closest('.question-screen')?.querySelector('.question-error');
+        const error = question.closest('.mstep-question-box')?.querySelector('.question-error');
         if (error) error.hidden = true;
       }
-    }
+    };
 
-    function clearSelection() {
+    const clearSelection = () => {
       choices.forEach((choice) => choice.classList.remove('selected'));
       selected = null;
-    }
+    };
 
-    function getChoice(choiceId) {
-      return choices.find((choice) => choice.dataset.choiceId === choiceId);
-    }
+    const getChoice = (id) => choices.find((choice) => choice.dataset.choiceId === id);
+    const getZone = (id) => zones.find((zone) => zone.dataset.zoneId === id);
 
-    function getZone(zoneId) {
-      return zones.find((zone) => zone.dataset.zoneId === zoneId);
-    }
-
-    function zoneAtPoint(clientX, clientY) {
-      const elements = document.elementsFromPoint(clientX, clientY);
-      return elements
-        .map((element) => element.closest?.('.mtest-drop-zone'))
+    const zoneAtPoint = (x, y) => {
+      return document.elementsFromPoint(x, y)
+        .map((el) => el.closest?.('.mtest-drop-zone'))
         .find((zone) => zone && question.contains(zone)) || null;
-    }
+    };
 
-    function bankAtPoint(clientX, clientY) {
+    const bankAtPoint = (x, y) => {
       const rect = bank.getBoundingClientRect();
-      return (
-        clientX >= rect.left && clientX <= rect.right &&
-        clientY >= rect.top && clientY <= rect.bottom
-      );
-    }
+      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    };
 
-    function returnToBank(choice) {
+    const returnToBank = (choice) => {
       if (!choice) return;
-
-      const oldZoneId = placements[choice.dataset.choiceId];
-      const oldZone = getZone(oldZoneId);
+      const oldZone = getZone(placements[choice.dataset.choiceId]);
       if (oldZone) oldZone.classList.remove('filled');
-
       delete placements[choice.dataset.choiceId];
       bank.appendChild(choice);
       clearSelection();
       sync();
-    }
+    };
 
-    function place(choice, zone) {
+    const place = (choice, zone) => {
       if (!choice || !zone) return;
-
       const choiceId = choice.dataset.choiceId;
       const zoneId = zone.dataset.zoneId;
       const oldZone = getZone(placements[choiceId]);
       if (oldZone) oldZone.classList.remove('filled');
 
-      const occupantId = Object.keys(placements).find(
-        (id) => placements[id] === zoneId && id !== choiceId
-      );
-
+      const occupantId = Object.keys(placements).find((id) => placements[id] === zoneId && id !== choiceId);
       if (occupantId) {
         const occupant = getChoice(occupantId);
         if (occupant) bank.appendChild(occupant);
@@ -384,22 +341,13 @@
       placements[choiceId] = zoneId;
       clearSelection();
       sync();
-    }
-
-    function removeGhost() {
-      if (!pointerDrag) return;
-      pointerDrag.ghost.remove();
-      pointerDrag.choice.classList.remove('pointer-dragging');
-      zones.forEach((zone) => zone.classList.remove('over'));
-      document.body.classList.remove('dragging-answer');
-    }
+    };
 
     choices.forEach((choice) => {
       choice.removeAttribute('draggable');
 
       choice.addEventListener('pointerdown', (event) => {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
-
         event.preventDefault();
         const rect = choice.getBoundingClientRect();
         const ghost = choice.cloneNode(true);
@@ -411,7 +359,6 @@
           top: `${rect.top}px`,
         });
         document.body.appendChild(ghost);
-
         pointerDrag = {
           choice,
           ghost,
@@ -421,15 +368,12 @@
           startX: event.clientX,
           startY: event.clientY,
         };
-
         choice.classList.add('pointer-dragging');
-        document.body.classList.add('dragging-answer');
       });
 
       choice.addEventListener('click', (event) => {
         event.preventDefault();
         if (pointerDrag) return;
-
         const wasSelected = choice.classList.contains('selected');
         clearSelection();
         if (!wasSelected) {
@@ -442,25 +386,20 @@
     document.addEventListener('pointermove', (event) => {
       if (!pointerDrag || event.pointerId !== pointerDrag.pointerId) return;
       event.preventDefault();
-
       pointerDrag.ghost.style.left = `${event.clientX - pointerDrag.offsetX}px`;
       pointerDrag.ghost.style.top = `${event.clientY - pointerDrag.offsetY}px`;
-
       const targetZone = zoneAtPoint(event.clientX, event.clientY);
       zones.forEach((zone) => zone.classList.toggle('over', zone === targetZone));
     }, { passive: false });
 
     document.addEventListener('pointerup', (event) => {
       if (!pointerDrag || event.pointerId !== pointerDrag.pointerId) return;
-
       const drag = pointerDrag;
-      const moved = Math.hypot(
-        event.clientX - drag.startX,
-        event.clientY - drag.startY
-      ) > 5;
+      const moved = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 5;
       const targetZone = zoneAtPoint(event.clientX, event.clientY);
-
-      removeGhost();
+      drag.ghost.remove();
+      drag.choice.classList.remove('pointer-dragging');
+      zones.forEach((zone) => zone.classList.remove('over'));
       pointerDrag = null;
 
       if (!moved) {
@@ -474,29 +413,23 @@
       }
     });
 
-    document.addEventListener('pointercancel', (event) => {
-      if (!pointerDrag || event.pointerId !== pointerDrag.pointerId) return;
-      removeGhost();
+    document.addEventListener('pointercancel', () => {
+      if (!pointerDrag) return;
+      pointerDrag.ghost.remove();
+      pointerDrag.choice.classList.remove('pointer-dragging');
+      zones.forEach((zone) => zone.classList.remove('over'));
       pointerDrag = null;
     });
 
     zones.forEach((zone) => {
       zone.tabIndex = 0;
-
-      zone.addEventListener('click', () => {
-        if (selected) place(selected, zone);
-      });
-
+      zone.addEventListener('click', () => { if (selected) place(selected, zone); });
       zone.addEventListener('keydown', (event) => {
         if ((event.key === 'Enter' || event.key === ' ') && selected) {
           event.preventDefault();
           place(selected, zone);
         }
       });
-    });
-
-    bank.addEventListener('click', (event) => {
-      if (selected && event.target === bank) returnToBank(selected);
     });
 
     Object.entries(placements).forEach(([choiceId, zoneId]) => {
@@ -511,20 +444,23 @@
     sync();
   });
 
-  document.querySelectorAll('.choice-card input').forEach((input) => {
-    input.addEventListener('change', () => {
-      input.closest('.question-workspace').querySelector('.question-error').hidden = true;
-    });
+  const exitDialog = document.getElementById('exit-dialog');
+  document.getElementById('exit-test-button').addEventListener('click', () => {
+    exitDialog.hidden = false;
   });
-  const helpDialog = document.getElementById('help-dialog');
-  document.getElementById('help-button').addEventListener('click', () => { helpDialog.hidden = false; });
-  document.getElementById('help-close').addEventListener('click', () => { helpDialog.hidden = true; });
-  helpDialog.addEventListener('click', (event) => { if (event.target === helpDialog) helpDialog.hidden = true; });
-  document.getElementById('fullscreen-button').addEventListener('click', async () => {
-    if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.();
-    else await document.exitFullscreen?.();
+  document.getElementById('cancel-exit').addEventListener('click', () => {
+    exitDialog.hidden = true;
   });
-  updateProgress();
+  document.getElementById('confirm-exit').addEventListener('click', () => {
+    document.querySelector('.mstep-frame').innerHTML = `
+      <div class="mstep-exited-screen">
+        <h1>Test Exited</h1>
+        <p>Your assessment was not submitted. You may close this window.</p>
+      </div>`;
+    exitDialog.hidden = true;
+  });
+
+  backButton.disabled = true;
 })();
 </script>
 <script type="module">
