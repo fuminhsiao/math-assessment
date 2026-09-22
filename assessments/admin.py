@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Answer, Choice, Question, QuestionSet, QuestionSetItem, Submission
+from .models import Answer, Choice, FreeAnnotation, Question, QuestionSet, QuestionSetItem, Submission
 
 admin.site.site_header = "Math Assessment Administration"
 admin.site.site_title = "Math Assessment Admin"
@@ -48,3 +48,9 @@ class SubmissionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Choice)
+
+
+@admin.register(FreeAnnotation)
+class FreeAnnotationAdmin(admin.ModelAdmin):
+    list_display = ('id','question','x','y','updated_at')
+    search_fields = ('text','question__prompt')

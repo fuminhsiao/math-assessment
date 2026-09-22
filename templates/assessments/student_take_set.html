@@ -30,12 +30,27 @@
         </button>
       </div>
 
-      <div class="mstep-toolbox" aria-label="Assessment tools">
-        <span class="mstep-tool-placeholder"></span>
-        <span class="mstep-tool-placeholder"></span>
-        <span class="mstep-tool-placeholder"></span>
-        <span class="mstep-tool-placeholder"></span>
-        <span class="mstep-tool-placeholder"></span>
+      <div class="mstep-toolbox" aria-label="Assessment tools" id="assessment-toolbox">
+        <button type="button" class="mstep-tool-button active" id="pointer-tool" aria-label="Pointer" title="Pointer"><span class="tool-pointer-icon">➤</span></button>
+        <div class="mstep-tool-menu-wrap">
+          <button type="button" class="mstep-tool-button" id="highlighter-tool" aria-label="Highlighter" title="Highlighter"><span class="tool-highlighter-icon">▰</span></button>
+          <div class="mstep-tool-menu highlighter-menu" id="highlighter-menu" hidden>
+            <button type="button" id="use-highlighter">Use Highlighter<span class="highlighter-swatch"></span></button>
+            <button type="button" id="clear-highlights">Clear All</button>
+          </div>
+        </div>
+        <button type="button" class="mstep-tool-button" id="notepad-tool" aria-label="Notepad" title="Notepad"><span class="tool-note-icon">◩</span></button>
+        <div class="mstep-tool-menu-wrap">
+          <button type="button" class="mstep-tool-button" id="magnifier-tool" aria-label="Magnifier" title="Magnifier"><span class="tool-magnifier-icon">⌕</span></button>
+          <div class="mstep-tool-menu magnifier-menu" id="magnifier-menu" hidden>
+            <button type="button" data-zoom="1">Off</button>
+            <button type="button" data-zoom="1.5">× 1.5</button>
+            <button type="button" data-zoom="2">× 2.0</button>
+            <button type="button" data-zoom="3">× 3.0</button>
+            <button type="button" data-zoom="4">× 4.0</button>
+          </div>
+        </div>
+        <button type="button" class="mstep-tool-button" id="line-guide-tool" aria-label="Line Guide" title="Line Guide"><span class="tool-line-icon">☰</span></button>
       </div>
     </div>
 
@@ -71,13 +86,31 @@
                 </div>
 
               {% elif q.question_type == 'mathlive' %}
-                <div class="mstep-math-answer">
-                  <math-field
-                    id="math-field-{{ q.id }}"
-                    class="mathlive-field mstep-math-field"
-                    virtual-keyboard-mode="onfocus"
-                    aria-label="Answer for question {{ forloop.counter }}"
-                  >{{ request.POST|get_item:q.id }}</math-field>
+                <div class="mstep-value-answer">
+                  <div class="value-input-widget" data-value-input data-initial="{{ request.POST|get_item:q.id|escape }}">
+                    <div class="vi-toolbar" aria-label="Value input editing tools">
+                      <button type="button" class="vi-tool" data-action="clear" title="Clear all" aria-label="Clear all"><span class="vi-icon vi-clear">↻</span></button>
+                      <button type="button" class="vi-tool" data-action="undo" title="Undo" aria-label="Undo"><span class="vi-icon">↶</span></button>
+                      <button type="button" class="vi-tool" data-action="redo" title="Redo" aria-label="Redo"><span class="vi-icon">↷</span></button>
+                      <button type="button" class="vi-tool" data-action="left" title="Go left" aria-label="Go left"><span class="vi-icon">←</span></button>
+                      <button type="button" class="vi-tool" data-action="right" title="Go right" aria-label="Go right"><span class="vi-icon">→</span></button>
+                      <button type="button" class="vi-tool" data-action="backspace" title="Backspace" aria-label="Backspace"><span class="vi-backspace-icon">×</span></button>
+                    </div>
+
+                    <div class="vi-display" data-display tabindex="0" role="textbox" aria-label="Answer input"></div>
+
+                    <div class="vi-keyboard">
+                      <div class="vi-number-pad" aria-label="Number keypad">
+                        <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
+                        <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
+                        <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
+                        <button type="button" data-key="0">0</button><button type="button" data-key=".">.</button><button type="button" data-action="negative" aria-label="Negative">(−)</button>
+                      </div>
+                      <button type="button" class="vi-fraction-key" data-action="fraction" aria-label="Insert fraction" title="Fraction">
+                        <span class="vi-mini-fraction"><span>□</span><span>□</span></span>
+                      </button>
+                    </div>
+                  </div>
                   <input type="hidden" name="answer_{{ q.id }}" id="answer-{{ q.id }}" value="{{ request.POST|get_item:q.id }}">
                 </div>
 
@@ -117,6 +150,17 @@
   </div>
 </section>
 
+<div class="student-notepad" id="student-notepad" hidden>
+  <div class="student-notepad-titlebar" id="notepad-drag-handle">
+    <span>Notepad</span>
+    <div class="student-notepad-actions">
+      <button type="button" id="notepad-move" aria-label="Move notepad" title="Move">✥</button>
+      <button type="button" id="notepad-close" aria-label="Close notepad" title="Close">×</button>
+    </div>
+  </div>
+  <textarea id="student-notepad-text" aria-label="Notepad text"></textarea>
+</div>
+
 <div class="mstep-exit-dialog" id="exit-dialog" hidden>
   <div class="mstep-exit-card" role="dialog" aria-modal="true" aria-labelledby="exit-title">
     <h2 id="exit-title">Exit Test?</h2>
@@ -146,27 +190,6 @@
   const nameOverlay = document.getElementById('name-overlay');
   let currentIndex = 0;
   let started = false;
-
-  function initializeMathFields() {
-    document.querySelectorAll('math-field.mathlive-field').forEach((field) => {
-      const questionId = field.id.replace('math-field-', '');
-      const hiddenInput = document.getElementById(`answer-${questionId}`);
-      if (!hiddenInput || field.dataset.ready === '1') return;
-      field.dataset.ready = '1';
-      field.mathVirtualKeyboardPolicy = 'auto';
-      field.smartFence = true;
-      field.smartMode = true;
-      const syncAnswer = () => {
-        hiddenInput.value = field.value || field.textContent || '';
-      };
-      field.addEventListener('input', syncAnswer);
-      field.addEventListener('change', syncAnswer);
-      syncAnswer();
-    });
-  }
-
-  initializeMathFields();
-  window.addEventListener('mathlive-ready', initializeMathFields);
 
   function showQuestion(index) {
     confirmationScreen.classList.remove('active');
@@ -257,12 +280,6 @@
   });
 
   form.addEventListener('submit', (event) => {
-    initializeMathFields();
-    document.querySelectorAll('math-field.mathlive-field').forEach((field) => {
-      const questionId = field.id.replace('math-field-', '');
-      const hidden = document.getElementById(`answer-${questionId}`);
-      if (hidden) hidden.value = field.value || field.textContent || '';
-    });
     if (!nameInput.value.trim() || currentIndex !== total) event.preventDefault();
   });
 
@@ -444,6 +461,161 @@
     sync();
   });
 
+  // ----- M-STEP assessment tools -----
+  const toolButtons = [...document.querySelectorAll('.mstep-tool-button')];
+  const pointerTool = document.getElementById('pointer-tool');
+  const highlighterTool = document.getElementById('highlighter-tool');
+  const highlighterMenu = document.getElementById('highlighter-menu');
+  const magnifierTool = document.getElementById('magnifier-tool');
+  const magnifierMenu = document.getElementById('magnifier-menu');
+  const notepadTool = document.getElementById('notepad-tool');
+  const lineGuideTool = document.getElementById('line-guide-tool');
+  let highlighterEnabled = false;
+
+  function closeToolMenus(except = null) {
+    [highlighterMenu, magnifierMenu].forEach(menu => {
+      if (menu !== except) menu.hidden = true;
+    });
+  }
+  function activateTool(button) {
+    toolButtons.forEach(b => b.classList.remove('active'));
+    if (button) button.classList.add('active');
+  }
+  pointerTool.addEventListener('click', () => {
+    highlighterEnabled = false;
+    document.body.classList.remove('highlighter-active');
+    closeToolMenus();
+    activateTool(pointerTool);
+  });
+  highlighterTool.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const opening = highlighterMenu.hidden;
+    closeToolMenus(highlighterMenu);
+    highlighterMenu.hidden = !opening;
+  });
+  document.getElementById('use-highlighter').addEventListener('click', () => {
+    highlighterEnabled = true;
+    document.body.classList.add('highlighter-active');
+    activateTool(highlighterTool);
+    highlighterMenu.hidden = true;
+  });
+  document.getElementById('clear-highlights').addEventListener('click', () => {
+    document.querySelectorAll('.student-highlight').forEach(mark => mark.replaceWith(...mark.childNodes));
+    highlighterMenu.hidden = true;
+  });
+
+  // Highlight selected text only inside the currently displayed question box.
+  document.addEventListener('mouseup', () => {
+    if (!highlighterEnabled) return;
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || !selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    const box = range.commonAncestorContainer.nodeType === 1
+      ? range.commonAncestorContainer.closest?.('.mstep-question-box')
+      : range.commonAncestorContainer.parentElement?.closest('.mstep-question-box');
+    if (!box || !box.closest('.mstep-question-screen.active')) return;
+    try {
+      const mark = document.createElement('mark');
+      mark.className = 'student-highlight';
+      range.surroundContents(mark);
+      selection.removeAllRanges();
+    } catch (_) { /* Ignore selections spanning incompatible elements. */ }
+  });
+
+  // Notepad: movable window with persistent text during this test session.
+  const notepad = document.getElementById('student-notepad');
+  const notepadHandle = document.getElementById('notepad-drag-handle');
+  const notepadMove = document.getElementById('notepad-move');
+  notepadTool.addEventListener('click', () => {
+    closeToolMenus();
+    notepad.hidden = false;
+    activateTool(notepadTool);
+    document.getElementById('student-notepad-text').focus();
+  });
+  document.getElementById('notepad-close').addEventListener('click', () => {
+    notepad.hidden = true;
+    activateTool(pointerTool);
+  });
+  let noteDrag = null;
+  function beginNoteDrag(e) {
+    if (e.target.closest('#notepad-close')) return;
+    const r = notepad.getBoundingClientRect();
+    noteDrag = {dx:e.clientX-r.left, dy:e.clientY-r.top, id:e.pointerId};
+    notepad.setPointerCapture?.(e.pointerId);
+    e.preventDefault();
+  }
+  notepadHandle.addEventListener('pointerdown', beginNoteDrag);
+  notepadMove.addEventListener('pointerdown', beginNoteDrag);
+  document.addEventListener('pointermove', e => {
+    if (!noteDrag || e.pointerId !== noteDrag.id) return;
+    const maxX = Math.max(0, window.innerWidth - notepad.offsetWidth);
+    const maxY = Math.max(0, window.innerHeight - notepad.offsetHeight);
+    notepad.style.left = `${Math.min(maxX, Math.max(0, e.clientX-noteDrag.dx))}px`;
+    notepad.style.top = `${Math.min(maxY, Math.max(0, e.clientY-noteDrag.dy))}px`;
+  });
+  document.addEventListener('pointerup', e => { if (noteDrag && e.pointerId === noteDrag.id) noteDrag = null; });
+
+  // Magnifier: zoom only the active question content.
+  magnifierTool.addEventListener('click', e => {
+    e.stopPropagation();
+    const opening = magnifierMenu.hidden;
+    closeToolMenus(magnifierMenu);
+    magnifierMenu.hidden = !opening;
+  });
+  magnifierMenu.querySelectorAll('[data-zoom]').forEach(btn => btn.addEventListener('click', () => {
+    const factor = Number(btn.dataset.zoom);
+    document.querySelectorAll('.mstep-question-box').forEach(box => {
+      box.style.zoom = factor === 1 ? '' : String(factor);
+    });
+    magnifierMenu.querySelectorAll('button').forEach(b => b.classList.toggle('selected', b === btn));
+    magnifierMenu.hidden = true;
+    activateTool(factor === 1 ? pointerTool : magnifierTool);
+  }));
+
+  // Line guide: one horizontal guide constrained to the active question box.
+  let lineGuideEnabled = false;
+  function removeLineGuides() { document.querySelectorAll('.student-line-guide').forEach(g => g.remove()); }
+  function installLineGuide() {
+    removeLineGuides();
+    if (!lineGuideEnabled) return;
+    const box = document.querySelector('.mstep-question-screen.active .mstep-question-box');
+    if (!box) return;
+    box.classList.add('line-guide-host');
+    const guide = document.createElement('div');
+    guide.className = 'student-line-guide';
+    guide.innerHTML = '<div class="student-line-guide-line"></div><button type="button" class="student-line-guide-handle" aria-label="Move line guide" title="Move line guide">✥</button>';
+    guide.style.top = '42%';
+    box.appendChild(guide);
+    const handle = guide.querySelector('.student-line-guide-handle');
+    let dragging = false;
+    handle.addEventListener('pointerdown', e => { dragging = true; handle.setPointerCapture?.(e.pointerId); e.preventDefault(); });
+    handle.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const r = box.getBoundingClientRect();
+      const y = Math.max(0, Math.min(r.height - 4, e.clientY-r.top));
+      guide.style.top = `${y}px`;
+    });
+    handle.addEventListener('pointerup', () => { dragging = false; });
+    handle.addEventListener('pointercancel', () => { dragging = false; });
+  }
+  lineGuideTool.addEventListener('click', () => {
+    closeToolMenus();
+    lineGuideEnabled = !lineGuideEnabled;
+    lineGuideTool.classList.toggle('active', lineGuideEnabled);
+    if (!lineGuideEnabled) activateTool(pointerTool);
+    installLineGuide();
+  });
+
+  // Rebuild the line guide when the student changes questions.
+  const originalShowQuestion = showQuestion;
+  showQuestion = function(index) { originalShowQuestion(index); requestAnimationFrame(installLineGuide); };
+  const originalShowConfirmation = showConfirmation;
+  showConfirmation = function() { originalShowConfirmation(); requestAnimationFrame(installLineGuide); };
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.mstep-tool-menu-wrap')) closeToolMenus();
+  });
+
   const exitDialog = document.getElementById('exit-dialog');
   document.getElementById('exit-test-button').addEventListener('click', () => {
     exitDialog.hidden = false;
@@ -463,8 +635,5 @@
   backButton.disabled = true;
 })();
 </script>
-<script type="module">
-  import 'https://esm.run/mathlive';
-  window.dispatchEvent(new Event('mathlive-ready'));
-</script>
+<script src="{% static 'assessments/js/value-input.js' %}"></script>
 {% endblock %}

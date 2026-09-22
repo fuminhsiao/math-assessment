@@ -8,7 +8,7 @@
       <h1>Your Assessments</h1>
       <p>Open an assessment to view student submissions and results.</p>
     </div>
-    <a class="button-link" href="{% url 'teacher_create_set' %}">Create New Assessment</a>
+    <div class="dashboard-actions"><a class="button-link secondary-teacher-button" href="{% url 'teacher_question_bank' %}">Question Bank</a><a class="button-link" href="{% url 'teacher_create_set' %}">Create New Assessment</a></div>
   </div>
 
   {% if question_sets %}
@@ -29,7 +29,11 @@
           </a>
           <div class="assessment-card-actions">
             <a href="{% url 'student_take_set' question_set.public_id %}" target="_blank" rel="noopener">Open Student Page</a>
-            <a href="{% url 'teacher_set_created' question_set.public_id %}">Share Link</a>
+            <a href="{% url 'teacher_explain_set' question_set.public_id %}">Teacher Explanation</a>
+            <a href="{% url 'teacher_set_created' question_set.public_id %}">Share Link</a><form method="post" action="{% url 'teacher_delete_set' question_set.public_id %}" class="delete-assessment-form" onsubmit="return confirm('Delete this question set and all of its student submissions? This cannot be undone.');">
+              {% csrf_token %}
+              <button type="submit" class="delete-assessment-button">Delete</button>
+            </form>
           </div>
         </article>
       {% endfor %}

@@ -14,6 +14,7 @@ class Question(models.Model):
     order = models.PositiveIntegerField("Display order", default=0)
     is_active = models.BooleanField("Active", default=True)
     drag_config = models.JSONField("Drag-and-drop configuration", default=dict, blank=True, help_text="Zones, choices, and correct placements for drag-and-drop image questions.")
+    general_annotation = models.TextField("General teacher annotation", blank=True, help_text="Optional note shown only on the teacher explanation page.")
 
     class Meta:
         ordering = ["order", "id"]
@@ -27,6 +28,7 @@ class Choice(models.Model):
     text = models.CharField("Choice text", max_length=255)
     value = models.CharField("Stored value", max_length=100)
     order = models.PositiveIntegerField("Display order", default=0)
+    annotation = models.TextField("Choice annotation", blank=True, help_text="Optional teacher-only explanation for this answer choice.")
 
     class Meta:
         ordering = ["order", "id"]
@@ -72,3 +74,18 @@ class Answer(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["submission", "question"], name="one_answer_per_question")]
+
+
+class FreeAnnotation(models.Model):
+    question = models.ForeignKey(Question, related_name="free_annotations", on_delete=models.CASCADE)
+    text = models.TextField("Annotation")
+    x = models.FloatField("Horizontal position")
+    y = models.FloatField("Vertical position")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"Note for question {self.question_id}: {self.text[:40]}"

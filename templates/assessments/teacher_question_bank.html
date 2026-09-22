@@ -1,0 +1,18 @@
+{% extends 'assessments/base.html' %}
+{% block title %}Question Bank{% endblock %}
+{% block content %}
+<section class="question-bank-page">
+<div class="question-bank-header"><div><p class="eyebrow">Teacher Portal</p><h1>Question Bank</h1><p>Create and manage questions for assessments.</p></div><a class="button-link" href="{% url 'teacher_question_create' %}">+ Add Question</a></div>
+<div class="question-bank-toolbar"><label><span>Search</span><input id="question-search" type="search" placeholder="Search questions..."></label><label><span>Question Type</span><select id="question-type-filter"><option value="all">All Types</option><option value="mathlive">Value Input</option><option value="multiple_choice">Multiple Choice</option></select></label></div>
+{% if questions %}<div class="question-bank-list">
+{% for q in questions %}<article class="question-bank-row" data-type="{{ q.question_type }}" data-search="{{ q.prompt|lower }}">
+<div><div class="bank-question-meta">{% if q.question_type == 'mathlive' %}<span class="type-badge type-mathlive">Value Input</span>{% else %}<span class="type-badge type-multiple_choice">Multiple Choice</span>{% endif %}{% if q.is_active %}<span class="status-active">Active</span>{% else %}<span class="status-archived">Archived</span>{% endif %}</div><h2>{{ q.prompt }}</h2>
+{% if q.question_type == 'mathlive' %}<p class="bank-answer-preview"><strong>Correct answer:</strong> {{ q.correct_answer }}</p>{% else %}<div class="bank-choice-preview">{% for c in q.choices.all %}<span {% if c.value == q.correct_answer %}class="correct-choice-preview"{% endif %}>{{ forloop.counter }}. {{ c.text }}</span>{% endfor %}</div>{% endif %}</div>
+<div class="bank-row-actions"><a href="{% url 'teacher_question_edit' q.id %}">Edit</a><a class="danger-link" href="{% url 'teacher_question_delete' q.id %}">Delete</a></div></article>{% endfor %}
+</div><div id="no-filter-results" class="empty-state" hidden>No questions match your search.</div>
+{% else %}<div class="card empty-dashboard"><h2>No questions yet</h2><p>Add a Value Input or Multiple Choice question to get started.</p><a class="button-link" href="{% url 'teacher_question_create' %}">Add Question</a></div>{% endif %}
+</section>
+{% endblock %}
+{% block scripts %}<script>
+(()=>{const s=document.getElementById('question-search'),f=document.getElementById('question-type-filter'),rows=[...document.querySelectorAll('.question-bank-row')],e=document.getElementById('no-filter-results');if(!s)return;function go(){let n=0,t=s.value.trim().toLowerCase();rows.forEach(r=>{r.hidden=!((!t||r.dataset.search.includes(t))&&(f.value==='all'||r.dataset.type===f.value));if(!r.hidden)n++});if(e)e.hidden=n!==0}s.addEventListener('input',go);f.addEventListener('change',go)})();
+</script>{% endblock %}

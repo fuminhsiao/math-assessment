@@ -1,0 +1,131 @@
+{% extends 'assessments/base.html' %}
+{% load assessment_extras static %}
+{% block title %}Teacher Explanation — {{ question_set.title }}{% endblock %}
+{% block body_class %}exam-page mstep-body teacher-explanation-body{% endblock %}
+{% block content %}
+<section class="mstep-exam teacher-explanation" data-total="{{ items|length }}">
+  <div class="mstep-frame">
+    <header class="mstep-titlebar">
+      <div class="mstep-title-copy"><div class="mstep-title">Mathematics Grade 6 Sample Items</div><div class="mstep-subtitle">Teacher Explanation</div></div>
+      <a class="mstep-exit" href="{% url 'home' %}" aria-label="Exit explanation" title="Exit"><span aria-hidden="true">×</span></a>
+    </header>
+    <div class="mstep-question-strip" id="question-strip">Question: 1</div>
+    <div class="mstep-toolbar-row">
+      <div class="mstep-nav-buttons">
+        <button type="button" class="mstep-arrow-button" id="back-button" title="Previous question">←</button>
+        <button type="button" class="mstep-arrow-button" id="next-button" title="Next question">→</button>
+      </div>
+      <div class="mstep-toolbox teacher-explanation-toolbox" aria-label="Explanation tools">
+        <button type="button" class="mstep-tool-button teacher-add-note-tool" id="add-note-tool" title="Add Annotation" aria-label="Add Annotation">
+          <span aria-hidden="true">＋▱</span><span class="teacher-add-note-label">Add Annotation</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="mstep-content-area teacher-explanation-content">
+      {% for item in items %}{% with q=item.question %}
+      <section class="mstep-question-screen{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
+        {% if q.general_annotation %}<aside class="teacher-general-note"><strong>Question Note</strong><div>{{ q.general_annotation|linebreaksbr }}</div></aside>{% endif %}
+        <div class="mstep-question-box teacher-annotation-canvas" data-question-id="{{ q.id }}">
+          <div class="mstep-question-prompt">{{ q.prompt }}</div>
+          {% if q.question_type == 'multiple_choice' %}
+          <div class="mstep-options">
+            {% for choice in q.choices.all %}
+            <div class="teacher-choice-block">
+              <div class="mstep-option-row teacher-option-row"><span class="mstep-option-letter">{{ forloop.counter|letter_label }}</span><span class="mstep-option-text">{{ choice.text }}</span>{% if choice.value == q.correct_answer %}<span class="teacher-correct-badge">Correct</span>{% endif %}</div>
+              {% if choice.annotation %}<div class="teacher-choice-annotation">{{ choice.annotation|linebreaksbr }}</div>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% elif q.question_type == 'mathlive' %}
+          <div class="teacher-value-answer"><span>Correct answer</span><strong>{{ q.correct_answer }}</strong></div>
+          {% endif %}
+
+          {% for note in q.free_annotations.all %}
+          <div class="free-annotation-pin" data-note-id="{{ note.id }}" data-x="{{ note.x }}" data-y="{{ note.y }}">
+            <div class="free-note-arrow"></div>
+            <div class="free-note-card"><textarea aria-label="Annotation">{{ note.text }}</textarea><div class="free-note-actions"><button type="button" data-note-action="move">Move</button><button type="button" data-note-action="save">Save</button><button type="button" data-note-action="delete">Delete</button></div></div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endwith %}{% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="student-notepad" id="student-notepad" hidden>
+  <div class="student-notepad-titlebar" id="notepad-drag-handle"><span>Notepad</span><div class="student-notepad-actions"><button type="button" id="notepad-move" title="Move">✥</button><button type="button" id="notepad-close" title="Close">×</button></div></div>
+  <textarea id="student-notepad-text" aria-label="Notepad"></textarea>
+</div>
+<div class="teacher-note-editor" id="teacher-note-editor" hidden>
+  <div class="teacher-note-editor-arrow"></div><textarea id="new-note-text" placeholder="Enter annotation..."></textarea>
+  <div><button type="button" id="save-new-note">Save</button><button type="button" id="cancel-new-note">Cancel</button></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(() => {
+  const screens=[...document.querySelectorAll('.mstep-question-screen')];
+  const strip=document.getElementById('question-strip');
+  const back=document.getElementById('back-button');
+  const next=document.getElementById('next-button');
+  let current=0;
+  function show(i){
+    current=Math.max(0,Math.min(screens.length-1,i));
+    screens.forEach((s,n)=>{s.classList.toggle('active',n===current);s.setAttribute('aria-hidden',n===current?'false':'true')});
+    strip.textContent=`Question: ${current+1}`;
+    back.disabled=current===0; next.disabled=current===screens.length-1;
+  }
+  back.onclick=()=>show(current-1); next.onclick=()=>show(current+1); show(0);
+
+  const add=document.getElementById('add-note-tool');
+  const editor=document.getElementById('teacher-note-editor');
+  const nt=document.getElementById('new-note-text');
+  let adding=false, pending=null;
+
+  function csrf(){let m=document.cookie.match(/csrftoken=([^;]+)/);return m?decodeURIComponent(m[1]):''}
+  async function post(url,data){
+    let r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrf()},body:JSON.stringify(data)});
+    if(!r.ok) throw new Error((await r.json()).error||'Save failed');
+    return r.json();
+  }
+
+  add.onclick=()=>{
+    adding=!adding;
+    document.body.classList.toggle('teacher-adding-note',adding);
+    add.classList.toggle('active',adding);
+    if(!adding){editor.hidden=true;pending=null;}
+  };
+
+  document.querySelectorAll('.teacher-annotation-canvas').forEach(canvas=>{
+    canvas.addEventListener('click',e=>{
+      if(!adding || e.target.closest('.free-annotation-pin')) return;
+      const r=canvas.getBoundingClientRect();
+      pending={canvas,x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))};
+      editor.style.left=(e.clientX+14)+'px'; editor.style.top=(e.clientY+8)+'px';
+      editor.hidden=false; nt.value=''; nt.focus(); e.stopPropagation();
+    });
+  });
+
+  document.getElementById('cancel-new-note').onclick=()=>{editor.hidden=true;pending=null};
+  document.getElementById('save-new-note').onclick=async()=>{
+    if(!pending||!nt.value.trim()) return;
+    const q=pending.canvas.dataset.questionId;
+    try{await post(`/teacher/annotations/question/${q}/create/`,{text:nt.value,x:pending.x,y:pending.y});location.reload()}
+    catch(e){alert(e.message)}
+  };
+
+  document.querySelectorAll('.free-annotation-pin').forEach(pin=>{
+    pin.style.left=(Number(pin.dataset.x)*100)+'%'; pin.style.top=(Number(pin.dataset.y)*100)+'%';
+    const id=pin.dataset.noteId, ta=pin.querySelector('textarea'); let moving=false;
+    pin.querySelector('[data-note-action="save"]').onclick=async()=>{try{await post(`/teacher/annotations/${id}/update/`,{text:ta.value})}catch(e){alert(e.message)}};
+    pin.querySelector('[data-note-action="delete"]').onclick=async()=>{if(!confirm('Delete this annotation?'))return;try{await post(`/teacher/annotations/${id}/delete/`,{});pin.remove()}catch(e){alert(e.message)}};
+    const mb=pin.querySelector('[data-note-action="move"]');
+    mb.onpointerdown=e=>{moving=true;mb.setPointerCapture?.(e.pointerId);e.preventDefault()};
+    mb.onpointermove=e=>{if(!moving)return;const c=pin.closest('.teacher-annotation-canvas'),r=c.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));pin.style.left=(x*100)+'%';pin.style.top=(y*100)+'%';pin.dataset.x=x;pin.dataset.y=y};
+    mb.onpointerup=async()=>{if(!moving)return;moving=false;try{await post(`/teacher/annotations/${id}/update/`,{x:+pin.dataset.x,y:+pin.dataset.y})}catch(e){alert(e.message)}};
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'assessments/base.html' %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<section class="teacher-question-editor card">
+<div class="editor-heading"><div><p class="eyebrow">Question Bank</p><h1>{{ page_title }}</h1><p>Create the question and define the correct answer.</p></div><a class="text-back-link" href="{% url 'teacher_question_bank' %}">← Back to Question Bank</a></div>
+<form method="post" id="teacher-question-form" novalidate>{% csrf_token %}{{ choice_formset.management_form }}
+{% if form.non_field_errors %}<div class="form-error-box">{{ form.non_field_errors }}</div>{% endif %}
+<div class="editor-field"><label for="{{ form.question_type.id_for_label }}">Question Type</label>{{ form.question_type }}{{ form.question_type.errors }}</div>
+<div class="editor-field"><label for="{{ form.prompt.id_for_label }}">Question Text</label>{{ form.prompt }}<p class="field-help">Enter the text exactly as students should see it.</p>{{ form.prompt.errors }}</div><div class="editor-field"><label for="{{ form.general_annotation.id_for_label }}">General Annotation <span class="optional-label">(optional)</span></label>{{ form.general_annotation }}<p class="field-help">Shown as a teacher-only sticky note beside the question on the Explanation page. It may be left blank.</p>{{ form.general_annotation.errors }}</div>
+<section id="value-input-settings" class="type-settings"><div class="type-settings-heading"><h2>Value Input Answer</h2><p>Students answer with the custom numeric input tool.</p></div><div class="editor-field"><label for="{{ form.correct_answer.id_for_label }}">Correct Answer</label>{{ form.correct_answer }}<p class="field-help">Example: 36.8, -4, or 0.5.</p>{{ form.correct_answer.errors }}</div></section>
+<section id="multiple-choice-settings" class="type-settings" hidden><div class="type-settings-heading"><h2>Answer Choices</h2><p>Enter at least two choices and select exactly one correct answer.</p></div>
+<div class="choice-editor-list" id="choice-editor-list">{% for cf in choice_formset.forms %}<div class="choice-editor-row">{{ cf.id }}{{ cf.value }}{{ cf.order }}<label class="correct-radio-wrap"><input type="radio" name="correct_choice_index" value="{{ forloop.counter0 }}"><span class="correct-radio"></span></label><span class="choice-letter">{{ forloop.counter }}</span><div class="choice-text-field">{{ cf.text }}{{ cf.text.errors }}<div class="choice-annotation-field">{{ cf.annotation }}{{ cf.annotation.errors }}</div></div><label class="remove-choice-label">{{ cf.DELETE }}<span>Remove</span></label><div class="hidden-correct-checkbox">{{ cf.is_correct }}</div></div>{% endfor %}</div>
+<button type="button" class="add-choice-button" id="add-choice-button">+ Add Choice</button>
+<template id="empty-choice-template">
+  <div class="choice-editor-row">{{ choice_formset.empty_form.id }}{{ choice_formset.empty_form.value }}{{ choice_formset.empty_form.order }}
+    <label class="correct-radio-wrap"><input type="radio" name="correct_choice_index" value="__prefix__"><span class="correct-radio"></span></label>
+    <span class="choice-letter"></span>
+    <div class="choice-text-field">{{ choice_formset.empty_form.text }}{{ choice_formset.empty_form.text.errors }}<div class="choice-annotation-field">{{ choice_formset.empty_form.annotation }}{{ choice_formset.empty_form.annotation.errors }}</div></div>
+    <label class="remove-choice-label">{{ choice_formset.empty_form.DELETE }}<span>Remove</span></label>
+    <div class="hidden-correct-checkbox">{{ choice_formset.empty_form.is_correct }}</div>
+  </div>
+</template>
+<p id="choice-client-error" class="field-error" hidden>Enter at least two choices and select exactly one correct answer.</p></section>
+<div class="availability-row">{{ form.is_active }}<label for="{{ form.is_active.id_for_label }}">Available in Question Bank</label></div>
+<div class="editor-actions"><a class="cancel-button" href="{% url 'teacher_question_bank' %}">Cancel</a><button type="submit">{{ submit_label }}</button></div></form></section>
+{% endblock %}
+{% block scripts %}<script>
+(()=>{
+ const type=document.getElementById('id_question_type'), v=document.getElementById('value-input-settings'), m=document.getElementById('multiple-choice-settings'), ca=document.getElementById('id_correct_answer'), form=document.getElementById('teacher-question-form');
+ const list=document.getElementById('choice-editor-list'), add=document.getElementById('add-choice-button'), total=document.getElementById('id_choices-TOTAL_FORMS'), tmpl=document.getElementById('empty-choice-template');
+
+ function rows(){return [...list.querySelectorAll('.choice-editor-row')]}
+ function renumber(){
+   rows().forEach((r,i)=>{
+     const letter=r.querySelector('.choice-letter'); if(letter) letter.textContent=i+1;
+     const radio=r.querySelector('input[name="correct_choice_index"]'); if(radio) radio.value=i;
+   });
+ }
+ function wireRow(row){
+   const radio=row.querySelector('input[name="correct_choice_index"]');
+   if(radio) radio.addEventListener('change',sync);
+   const del=row.querySelector('input[name$="-DELETE"]');
+   const remove=row.querySelector('.remove-choice-label');
+   if(remove) remove.addEventListener('click',e=>{
+     if(!del)return;
+     if(row.querySelector('input[name$="-id"]')?.value){ del.checked=true; row.hidden=true; }
+     else { row.remove(); }
+     sync(); renumber();
+   });
+ }
+ function sync(){
+   rows().forEach(r=>{
+     const radio=r.querySelector('input[name="correct_choice_index"]');
+     const hidden=r.querySelector('.hidden-correct-checkbox input');
+     const del=r.querySelector('input[name$="-DELETE"]');
+     if(hidden) hidden.checked=!!radio?.checked && !(del&&del.checked);
+   });
+ }
+ function addChoice(){
+   const i=Number(total.value);
+   const holder=document.createElement('div');
+   holder.innerHTML=tmpl.innerHTML.replaceAll('__prefix__',String(i)).trim();
+   const row=holder.firstElementChild;
+   list.appendChild(row); total.value=i+1; wireRow(row); renumber(); return row;
+ }
+ function ui(){const mc=type.value==='multiple_choice';v.hidden=mc;m.hidden=!mc;ca.disabled=mc}
+ rows().forEach((r,i)=>{const h=r.querySelector('.hidden-correct-checkbox input'),radio=r.querySelector('input[name="correct_choice_index"]');if(h?.checked&&radio)radio.checked=true;wireRow(r)});
+ add.addEventListener('click',addChoice);
+ type.addEventListener('change',()=>{
+   ui();
+   // New questions start with four visible choices, but after that choices are added one at a time.
+   if(type.value==='multiple_choice' && rows().length===0){for(let i=0;i<4;i++)addChoice();}
+ });
+ ui();
+ // If this is a brand-new MC form rendered after validation, ensure the intended default four exist.
+ if(type.value==='multiple_choice' && rows().length===0){for(let i=0;i<4;i++)addChoice();}
+ renumber();
+ form.addEventListener('submit',e=>{
+   if(type.value!=='multiple_choice')return;
+   sync();
+   const active=rows().filter(r=>{const t=r.querySelector('input[name$="-text"]'),d=r.querySelector('input[name$="-DELETE"]');return t&&t.value.trim()&&!(d&&d.checked)});
+   const selected=active.filter(r=>r.querySelector('input[name="correct_choice_index"]')?.checked);
+   if(active.length<2||selected.length!==1){e.preventDefault();document.getElementById('choice-client-error').hidden=false}
+ });
+})();
+</script>{% endblock %}

@@ -1,0 +1,3 @@
+{% extends 'assessments/base.html' %}{% block title %}Delete Question{% endblock %}{% block content %}
+<section class="card delete-question-card"><p class="eyebrow">Question Bank</p><h1>Delete Question?</h1><p>You are about to remove:</p><blockquote>{{ question.prompt }}</blockquote><p class="delete-note">If this question already has assessment or student-response history, it will be archived instead so existing results remain intact.</p><form method="post" class="delete-actions">{% csrf_token %}<a class="cancel-button" href="{% url 'teacher_question_bank' %}">Cancel</a><button class="danger-button" type="submit">Delete Question</button></form></section>
+{% endblock %}

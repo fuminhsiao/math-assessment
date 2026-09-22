@@ -104,3 +104,21 @@ python -m gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker
    - `WEB_CONCURRENCY`: `4`
 
 The app automatically uses SQLite locally when `DATABASE_URL` is absent and PostgreSQL on Render when `DATABASE_URL` is configured. ngrok hosts and CSRF origins remain enabled for local external testing.
+
+
+## M-STEP-style Value Input Widget
+
+The former MathLive response UI is now rendered with a custom, dependency-free value input widget. It includes Clear All, Undo, Redo, Left, Right, Backspace, digits 0-9, decimal point, Negative, and a two-part fraction key. It performs input only; it is not a calculator.
+
+## Teacher Explanation Mode
+
+This build adds a teacher-only explanation page for each assessment:
+`/teacher/sets/<public_id>/explain/`
+
+Annotations:
+- General Annotation: entered while adding/editing a question; displayed as a sticky note beside the question.
+- Choice Annotation: optional annotation for each multiple-choice option.
+- Free Annotation: click Add Annotation in the explanation toolbar, then click anywhere in the question area, enter text, and save. Position is stored as relative x/y coordinates in the database.
+- Saved free annotations can be edited, moved, or deleted.
+
+Run `python manage.py migrate` after upgrading. Migration `0004_teacher_annotations.py` adds the annotation fields/table.
