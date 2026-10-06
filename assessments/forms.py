@@ -35,6 +35,7 @@ class TeacherQuestionForm(forms.ModelForm):
         (Question.Type.GRID_LINE_DRAWING, "Grid Line Drawing"),
         (Question.Type.EQUATION_BUILDER, "Equation Builder"),
         (Question.Type.NUMBER_LINE_DRAG, "Number Line Drag"),
+        (Question.Type.DRAG_DROP_IMAGE, "Drag and Drop Image"),
     ])
     class Meta:
         model = Question

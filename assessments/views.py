@@ -50,7 +50,7 @@ def teacher_set_created(request, public_id):
 
 def teacher_question_bank(request):
     questions = Question.objects.filter(
-        question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.DRAG_DROP_IMAGE]
+        question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE]
     ).prefetch_related("choices").order_by("-id")
     return render(request, "assessments/teacher_question_bank.html", {"questions": questions})
 

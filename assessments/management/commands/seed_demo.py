@@ -74,6 +74,44 @@ class Command(BaseCommand):
             drag_config={"grid_cols":20,"grid_rows":20,"snap":True,"min_lines":1},
         )
 
+        # Keep the Render/PostgreSQL demo data in sync with the newer question types.
+        Question.objects.create(
+            prompt=(
+                "Christy has $60 to spend on plants.\n"
+                "She buys a peach tree for $23 and a plum tree for $19.\n\n"
+                "She wants to buy one more plant.\n\n"
+                "• Drag the numbers to the boxes and the symbols to the circles to create an equation "
+                "to show how much money Christy has left to spend.\n\n"
+                "• Select one plant she could buy with the money she has left."
+            ),
+            question_type=Question.Type.EQUATION_BUILDER,
+            correct_answer=json.dumps({"slots":["60","−","23","−","19","18"],"plant":"grapevines"}),
+            drag_config={
+                "operators":["+","−","×","÷"],
+                "numbers":["18","19","23","37","41","60","102"],
+                "slots":["number","operator","number","operator","number","number"],
+                "plants":[["grapevines","Grapevines, $16"],["apple","Apple tree, $18"],["pear","Pear tree, $20"]],
+            },
+            order=7, is_active=True,
+        )
+
+        Question.objects.create(
+            prompt="Drag each fraction to the correct location on the number line.",
+            question_type=Question.Type.NUMBER_LINE_DRAG,
+            correct_answer=json.dumps({"4/1":"4","1/4":"0.25","2/4":"0.5","4/4":"1"}),
+            drag_config={
+                "min":0,"max":4,"step":0.25,
+                "positions":[str(x/4).rstrip("0").rstrip(".") if x % 4 else str(x//4) for x in range(17)],
+                "choices":[
+                    {"value":"4/1","n":"4","d":"1"},
+                    {"value":"1/4","n":"1","d":"4"},
+                    {"value":"2/4","n":"2","d":"4"},
+                    {"value":"4/4","n":"4","d":"4"},
+                ],
+            },
+            order=8, is_active=True,
+        )
+
         self.stdout.write(self.style.SUCCESS(
-            "Question Bank reset: 6 questions created, including Grid Line Drawing."
+            "Question Bank reset: 8 questions created, one for each supported demo type."
         ))
