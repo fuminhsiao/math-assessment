@@ -41,7 +41,7 @@
               <span class="type-badge type-{{ question.question_type }}">{{ question.get_question_type_display }}</span>
             </div>
             <div class="teacher-question-prompt">{{ question.prompt }}</div>
-            {% if question.question_type == 'multiple_choice' %}
+            {% if question.question_type == 'multiple_choice' or question.question_type == 'multi_select' or question.question_type == 'yes_no_matrix' %}
               <div class="choice-preview">
                 {% for choice in question.choices.all %}<span>{{ choice.text }}</span>{% endfor %}
               </div>

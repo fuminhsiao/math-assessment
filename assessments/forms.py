@@ -9,7 +9,16 @@ class QuestionSetCreateForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["questions"].queryset = Question.objects.filter(
             is_active=True,
-            question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE],
+            question_type__in=[
+                Question.Type.MATHLIVE,
+                Question.Type.MULTIPLE_CHOICE,
+                Question.Type.MULTI_SELECT,
+                Question.Type.YES_NO_MATRIX,
+                Question.Type.GRID_LINE_DRAWING,
+                Question.Type.EQUATION_BUILDER,
+                Question.Type.NUMBER_LINE_DRAG,
+                Question.Type.DRAG_DROP_IMAGE,
+            ],
         ).prefetch_related("choices")
     def save(self):
         question_set = QuestionSet.objects.create(title=self.cleaned_data["title"])
@@ -21,6 +30,11 @@ class TeacherQuestionForm(forms.ModelForm):
     question_type = forms.ChoiceField(label="Question Type", choices=[
         (Question.Type.MATHLIVE, "Value Input"),
         (Question.Type.MULTIPLE_CHOICE, "Multiple Choice"),
+        (Question.Type.MULTI_SELECT, "Multi-select"),
+        (Question.Type.YES_NO_MATRIX, "Yes / No Matrix"),
+        (Question.Type.GRID_LINE_DRAWING, "Grid Line Drawing"),
+        (Question.Type.EQUATION_BUILDER, "Equation Builder"),
+        (Question.Type.NUMBER_LINE_DRAG, "Number Line Drag"),
     ])
     class Meta:
         model = Question

@@ -6,6 +6,11 @@ class Question(models.Model):
     class Type(models.TextChoices):
         MATHLIVE = "mathlive", "MathLive response"
         MULTIPLE_CHOICE = "multiple_choice", "Multiple choice"
+        MULTI_SELECT = "multi_select", "Multi-select"
+        YES_NO_MATRIX = "yes_no_matrix", "Yes / No Matrix"
+        GRID_LINE_DRAWING = "grid_line_drawing", "Grid Line Drawing"
+        EQUATION_BUILDER = "equation_builder", "Equation Builder"
+        NUMBER_LINE_DRAG = "number_line_drag", "Number Line Drag"
         DRAG_DROP_IMAGE = "drag_drop_image", "Drag and drop on image"
 
     prompt = models.TextField("Question prompt")

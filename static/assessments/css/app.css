@@ -817,3 +817,432 @@ body.dragging-answer {
 .teacher-explanation-toolbox .teacher-add-note-tool{width:auto!important;min-width:150px;padding:0 14px!important;gap:8px}.teacher-add-note-label{font-size:14px;font-weight:700;white-space:nowrap}
 
 .delete-assessment-form{display:inline;margin:0}.delete-assessment-button{border:0;background:transparent;color:#b42318;text-decoration:underline;cursor:pointer;font:inherit;padding:0}.delete-assessment-button:hover{color:#7a271a}
+
+/* M-STEP toolbar SVG icons supplied from the reference interface */
+.mstep-tool-button svg,.mstep-arrow-button svg{display:block;width:44px;height:44px;pointer-events:none}
+.mstep-tool-button,.mstep-arrow-button{display:flex;align-items:center;justify-content:center}
+
+/* M-STEP reference color/state/tooltip pass */
+:root{--mstep-blue:#002a5f}
+.mstep-question-strip{background:var(--mstep-blue)!important}
+.mstep-question-box{border-color:var(--mstep-blue)!important}
+.mstep-toolbox{border-color:var(--mstep-blue)!important}
+.mstep-tool-button{color:var(--mstep-blue)!important}
+.mstep-tool-button.active::after{background:var(--mstep-blue)!important}
+.mstep-tool-button svg path,.mstep-arrow-button svg path,.vi-action-svg path{fill:var(--mstep-blue)!important}
+.student-notepad-titlebar,.student-line-guide-line,.student-line-guide-handle{background:var(--mstep-blue)!important}
+.mstep-arrow-button.has-answer:not(:disabled){background:var(--mstep-blue)!important;border:2px solid #111!important}
+.mstep-arrow-button.has-answer:not(:disabled) svg path{fill:#fff!important}
+.mstep-arrow-button.has-answer:not(:disabled):hover{background:var(--mstep-blue)!important}
+.mstep-option-row:has(input:checked) .mstep-option-letter{background:var(--mstep-blue)!important;border-color:var(--mstep-blue)!important;color:#fff!important;box-shadow:none!important}
+.vi-tool{color:var(--mstep-blue)!important;border-right-color:var(--mstep-blue)!important}
+.vi-action-svg{display:block;width:26px;height:26px;overflow:visible}
+.vi-tool[data-action="undo"] .vi-action-svg,.vi-tool[data-action="redo"] .vi-action-svg{width:29px;height:18px}
+.vi-tool[data-action="left"] .vi-action-svg,.vi-tool[data-action="right"] .vi-action-svg{width:27px;height:18px}
+.vi-tool[data-action="backspace"] .vi-action-svg{width:28px;height:21px}
+
+/* Black reference-style hover labels and the small upward pointer under the control. */
+.mstep-tooltip{position:relative}
+.mstep-tooltip::before{
+  content:attr(data-tooltip);position:absolute;z-index:500;left:50%;top:calc(100% + 12px);
+  transform:translateX(-50%);padding:3px 5px;border-radius:3px;background:#050505;color:#fff;
+  font:400 15px/1.15 Arial,sans-serif;white-space:nowrap;opacity:0;visibility:hidden;pointer-events:none
+}
+.mstep-tooltip::after{
+  content:"";position:absolute;z-index:501;left:50%;top:calc(100% + 4px);transform:translateX(-50%);
+  border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:8px solid #050505;
+  opacity:0;visibility:hidden;pointer-events:none
+}
+.mstep-tooltip:hover::before,.mstep-tooltip:hover::after,.mstep-tooltip:focus-visible::before,.mstep-tooltip:focus-visible::after{opacity:1;visibility:visible}
+.vi-toolbar{overflow:visible}
+.value-input-widget{overflow:visible}
+
+/* Reference-size correction — keep SVG intrinsic dimensions from the source UI. */
+.vi-tool .vi-action-svg{display:block!important;width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;overflow:visible}
+.vi-tool[data-action="clear"] .vi-action-svg{width:24px!important;height:24px!important}
+.vi-tool[data-action="undo"] .vi-action-svg,.vi-tool[data-action="redo"] .vi-action-svg{width:21px!important;height:8px!important}
+.vi-tool[data-action="left"] .vi-action-svg,.vi-tool[data-action="right"] .vi-action-svg{width:17px!important;height:10px!important}
+.vi-tool[data-action="backspace"] .vi-action-svg{width:20px!important;height:14px!important}
+
+/* Reference equation/value-input typography seen in the inspected MathQuill UI. */
+.value-input-widget,.value-input-widget input,.value-input-widget button,
+.value-input-widget .vi-display,.value-input-widget .vi-slot,
+.value-input-widget math-field{
+  font-family:Arial,Helvetica,sans-serif!important;
+}
+.value-input-widget .vi-display,.value-input-widget .vi-slot{
+  font-size:16px!important;
+  line-height:40px!important;
+}
+.value-input-widget math-field{
+  font-size:16px!important;
+  line-height:40px!important;
+}
+.vi-key{font-family:Arial,Helvetica,sans-serif!important;font-weight:400!important}
+
+/* All tooltips: directly below the control, with an upward-pointing black triangle. */
+.mstep-tooltip{position:relative!important;overflow:visible!important}
+.mstep-tooltip::before{
+  content:attr(data-tooltip)!important;
+  position:absolute!important;
+  left:50%!important;
+  top:calc(100% + 9px)!important;
+  transform:translateX(-50%)!important;
+  z-index:10000!important;
+  display:block!important;
+  padding:2px 4px 3px!important;
+  border-radius:4px!important;
+  background:#050505!important;
+  color:#fff!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:16px!important;
+  font-weight:400!important;
+  line-height:1.15!important;
+  white-space:nowrap!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+.mstep-tooltip::after{
+  content:""!important;
+  position:absolute!important;
+  left:50%!important;
+  top:calc(100% + 1px)!important;
+  transform:translateX(-50%)!important;
+  z-index:10001!important;
+  width:0!important;height:0!important;
+  border-left:8px solid transparent!important;
+  border-right:8px solid transparent!important;
+  border-bottom:8px solid #050505!important;
+  border-top:0!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+.mstep-tooltip:hover::before,.mstep-tooltip:hover::after,
+.mstep-tooltip:focus-visible::before,.mstep-tooltip:focus-visible::after{
+  opacity:1!important;visibility:visible!important;
+}
+/* Input toolbar uses the same reference tooltip treatment. */
+.vi-tool.mstep-tooltip{overflow:visible!important}
+.vi-toolbar,.vi-topbar,.value-input-widget,.mstep-toolbar-row,.mstep-toolbox,.mstep-nav-buttons{overflow:visible!important}
+
+/* Official eqinput geometry pass (reference screenshots supplied 2026-10-06). */
+.value-input-widget.eqinput.inputtype{
+  box-sizing:border-box!important;
+  width:547.212px!important;
+  max-width:100%!important;
+  min-height:264.03px!important;
+  padding:0!important;
+  margin:0!important;
+  border:0.667px solid #aeb7c3!important;
+  border-radius:5px!important;
+  overflow:visible!important;
+  background:#fff!important;
+}
+.value-input-widget .eq-toolbar.input-toolbar{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-height:38.305px!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  overflow:visible!important;
+}
+.value-input-widget .non-help-button-container{
+  box-sizing:border-box!important;
+  width:229.829px!important;
+  height:38.305px!important;
+  min-width:229.829px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  display:flex!important;
+  align-items:stretch!important;
+  overflow:visible!important;
+}
+.value-input-widget .toolbar-button{
+  box-sizing:border-box!important;
+  flex:0 0 38.305px!important;
+  width:38.305px!important;
+  height:38.305px!important;
+  min-width:38.305px!important;
+  min-height:38.305px!important;
+  max-width:38.305px!important;
+  max-height:38.305px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:none!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:visible!important;
+}
+.value-input-widget .help-button-container{
+  height:38.305px!important;
+  min-height:38.305px!important;
+  display:flex!important;
+  align-items:center!important;
+}
+
+/* Official compact toolbar correction.
+   Reference: square 38.305px controls, compact spacing, short separators,
+   including a separator after Backspace. */
+.value-input-widget .eq-toolbar.input-toolbar{
+  height:38.305px!important;
+  min-height:38.305px!important;
+  padding:0!important;
+  align-items:center!important;
+}
+
+.value-input-widget .non-help-button-container{
+  width:229.829px!important;
+  min-width:229.829px!important;
+  max-width:229.829px!important;
+  height:38.305px!important;
+  min-height:38.305px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:0!important;
+}
+
+/* Each official toolbar control is square: width = height. */
+.value-input-widget .toolbar-button{
+  box-sizing:border-box!important;
+  flex:0 0 38.305px!important;
+  width:38.305px!important;
+  height:38.305px!important;
+  min-width:38.305px!important;
+  min-height:38.305px!important;
+  max-width:38.305px!important;
+  max-height:38.305px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+
+  /* Short vertical divider: leaves space above and below like official UI.
+     This intentionally remains on the final Backspace button too. */
+  background-color:transparent!important;
+  background-image:linear-gradient(#002a5f,#002a5f)!important;
+  background-repeat:no-repeat!important;
+  background-position:right center!important;
+  background-size:2px 29px!important;
+}
+
+/* Keep all six controls tightly packed; do NOT remove the last divider. */
+.value-input-widget .toolbar-button:last-child{
+  border-right:0!important;
+  background-image:linear-gradient(#002a5f,#002a5f)!important;
+}
+
+/* Override the older large-toolbar rules completely. */
+.value-input-widget .vi-toolbar{
+  padding:0!important;
+}
+.value-input-widget .vi-tool{
+  width:38.305px!important;
+  height:38.305px!important;
+  min-width:38.305px!important;
+  min-height:38.305px!important;
+  margin:0!important;
+  padding:0!important;
+  border-right:0!important;
+}
+
+/* Help button remains aligned to the same compact toolbar height. */
+.value-input-widget .help-button-container{
+  height:38.305px!important;
+  min-height:38.305px!important;
+  margin:0!important;
+  padding:0!important;
+  align-items:center!important;
+}
+
+/* Keep the input action buttons packed against the LEFT.
+   The help button may remain at the far right, but the six action controls
+   must never be distributed across the full toolbar. */
+.value-input-widget .eq-toolbar.input-toolbar{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:0!important;
+}
+
+.value-input-widget .non-help-button-container{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:0!important;
+  flex:0 0 229.829px!important;
+  width:229.829px!important;
+  min-width:229.829px!important;
+  max-width:229.829px!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+/* Prevent individual buttons from growing or receiving distributed spacing. */
+.value-input-widget .non-help-button-container > .toolbar-button,
+.value-input-widget .non-help-button-container > .vi-tool{
+  flex-grow:0!important;
+  flex-shrink:0!important;
+  margin-left:0!important;
+  margin-right:0!important;
+}
+
+/* Push only the help area to the far right. */
+.value-input-widget .help-button-container{
+  margin-left:auto!important;
+  margin-right:0!important;
+  flex:0 0 auto!important;
+}
+
+/* Answer-gated Next navigation, matching the supplied reference screenshots. */
+.mstep-arrow-button#next-button:disabled{
+  background:#eeeeee!important;
+  border:0!important;
+  box-shadow:none!important;
+  cursor:default!important;
+  opacity:1!important;
+  pointer-events:none!important;
+}
+.mstep-arrow-button#next-button:disabled svg path{
+  fill:#242b35!important;
+}
+.mstep-arrow-button#next-button:not(:disabled){
+  background:#002a5f!important;
+  border:2px solid #111!important;
+  box-shadow:none!important;
+  cursor:pointer!important;
+  opacity:1!important;
+}
+.mstep-arrow-button#next-button:not(:disabled) svg path{
+  fill:#fff!important;
+}
+.mstep-arrow-button#next-button:not(:disabled):hover{
+  background:#002a5f!important;
+}
+/* Disabled Next must never display a tooltip. */
+.mstep-arrow-button#next-button:disabled::before,
+.mstep-arrow-button#next-button:disabled::after{
+  display:none!important;
+}
+
+
+/* M-STEP multi-select response circles */
+.mstep-multi-select .mstep-option-row {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-height:46px;
+  cursor:pointer;
+}
+.mstep-multi-select .multi-select-choice {
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  display:inline-block !important;
+  box-sizing:border-box !important;
+  width:30px !important;
+  height:30px !important;
+  min-width:30px !important;
+  flex:0 0 30px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:2px solid #111 !important;
+  border-radius:50% !important;
+  background:#fff !important;
+  box-shadow:none !important;
+  opacity:1 !important;
+  position:static !important;
+  cursor:pointer;
+}
+.mstep-multi-select .multi-select-choice:checked {
+  background:#002a5f !important;
+  border-color:#111 !important;
+}
+.mstep-multi-select .multi-select-choice:focus-visible {
+  outline:3px solid #a0caff;
+  outline-offset:2px;
+}
+.mstep-multi-select .mstep-option-letter {
+  display:none !important;
+}
+
+
+/* Yes / No Matrix question */
+.mstep-yn-matrix{width:max-content;max-width:100%;margin-top:72px;border:1px solid #7f8790;background:#fff;font-size:20px}
+.yn-toolbar{height:56px;background:#b4becb;border-bottom:1px solid #555;display:flex;align-items:center;padding:0 10px}
+.yn-clear{width:40px;height:40px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer}
+.yn-table{border-collapse:separate;border-spacing:3px;margin:0;font-size:20px}
+.yn-table th,.yn-table td{border:2px solid #111;padding:0;background:#fff}
+.yn-table thead th{font-size:22px;font-weight:700;text-align:center;height:38px;min-width:58px}
+.yn-table thead .yn-blank{border-color:transparent;min-width:170px}
+.yn-table tbody th{font-weight:400;text-align:left;padding:8px 10px;min-width:170px;white-space:nowrap}
+.yn-table td{width:58px;height:58px;text-align:center}
+.yn-cell{width:100%;height:100%;border:0;background:#fff;display:grid;place-items:center;cursor:pointer}
+.yn-cell span{display:none;width:34px;height:34px;border-radius:5px;background:#2786ef;color:#fff;font-size:30px;line-height:34px;font-weight:700}
+.yn-cell::before{content:'';width:30px;height:30px;border:2px solid #888;border-radius:5px;background:#fff}
+.yn-cell.selected::before{display:none}
+.yn-cell.selected span{display:block}
+
+
+/* Grid Line Drawing question */
+.grid-drawing-widget{width:660px;max-width:52%;margin:-38px 18px 0 auto;border:1px solid #b6bec8;border-radius:5px;background:#fff;overflow:hidden}
+.grid-drawing-toolbar{height:46px;background:#b4becb;display:flex;align-items:center;padding:0 8px;gap:0}
+.grid-tool{width:42px;height:38px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;padding:0}
+.grid-tool svg{max-width:24px;max-height:24px}.grid-toolbar-sep{height:34px;border-left:3px solid #002a5f;margin:0 4px}.grid-line-dot{width:12px;height:12px;background:#002a5f;border-radius:50%;margin:0 4px}
+.grid-line-width{height:30px;width:92px;border:1px solid #9aa3ad;background:#fff;font-size:22px;padding:0 8px;color:#111}
+.grid-drawing-svg{display:block;width:100%;height:auto;background:#fff;cursor:crosshair;touch-action:none;user-select:none}
+@media(max-width:900px){.grid-drawing-widget{max-width:100%;width:100%;margin:24px 0 0}}
+
+/* Equation Builder */
+.equation-builder{width:min(760px,100%);border:1px solid #aeb8c5;border-radius:6px;overflow:hidden;background:#fff;margin-top:22px}
+.eqb-toolbar{height:52px;background:#b2bcc9;display:flex;align-items:center;padding:0 10px;border-bottom:1px solid #777}.eqb-clear{border:0;background:transparent;width:42px;height:42px;display:grid;place-items:center;cursor:pointer}
+.eqb-workspace{display:flex;min-height:330px}.eqb-bank{width:104px;border-right:3px solid #111;padding:7px 12px;display:flex;flex-direction:column;align-items:center;gap:7px}.eqb-token{font:inherit;font-size:24px;background:#fff;border:2px solid #888;display:grid;place-items:center;cursor:grab}.eqb-token.number{width:58px;height:50px}.eqb-token.operator{width:58px;height:58px;border-radius:50%}.eqb-token.selected{outline:4px solid #a0caff;outline-offset:1px}
+.eqb-equation{flex:1;display:flex;align-items:center;justify-content:center;gap:17px;padding:25px}.eqb-slot{width:58px;height:58px;border:2px solid #777;display:grid;place-items:center;font-size:25px;background:#fff}.eqb-slot.circle{border-radius:50%}.eqb-slot.filled{background:#eef5ff;color:#002a5f;font-weight:700}.eqb-equals{font-size:28px;font-weight:700;color:#555}
+.eqb-plants{border-top:1px solid #aeb8c5;padding:22px 30px;display:flex;flex-direction:column;gap:14px;align-items:center}.eqb-plants label{width:270px;font-size:20px;display:flex;gap:12px;align-items:center;cursor:pointer}.eqb-plants input{position:absolute;opacity:0}.eqb-plants label span{width:24px;height:24px;border:2px solid #555;border-radius:50%;background:#fff}.eqb-plants input:checked+span{background:#002a5f;box-shadow:inset 0 0 0 4px #fff}
+@media(max-width:800px){.eqb-workspace{flex-direction:column}.eqb-bank{width:auto;border-right:0;border-bottom:2px solid #111;flex-direction:row;flex-wrap:wrap}.eqb-equation{gap:7px;padding:20px 8px}.eqb-slot{width:44px;height:44px}.eqb-token.number,.eqb-token.operator{width:46px;height:46px}}
+
+/* Equation Builder: M-STEP two-column item layout */
+.eqb-question-layout{display:grid;grid-template-columns:minmax(310px,38%) minmax(560px,62%);gap:22px;align-items:start;width:100%}
+.eqb-prompt-pane{font-size:22px;line-height:1.25;padding:4px 8px 0 0}
+.eqb-prompt-pane p{margin:0 0 30px}
+.eqb-prompt-pane ul{margin:0;padding-left:34px}
+.eqb-prompt-pane li{margin:0 0 28px;padding-left:4px}
+.eqb-question-layout .equation-builder{min-width:0;width:100%}
+.eqb-bank .eqb-token{color:#111!important;opacity:1!important;visibility:visible!important;font-size:20px!important;font-weight:500!important;line-height:1!important}
+.eqb-bank .eqb-token.number{display:flex!important;align-items:center!important;justify-content:center!important;background:#fff!important}
+.eqb-bank .eqb-token.operator{display:flex!important;align-items:center!important;justify-content:center!important;background:#fff!important}
+.grid-line-type{height:30px;min-width:120px;border:1px solid #8a8f96;background:#fff;color:#111;font-size:15px}
+@media(max-width:900px){.eqb-question-layout{grid-template-columns:1fr}.eqb-prompt-pane{font-size:19px}.eqb-question-layout .equation-builder{width:100%}}
+/* Number Line Drag item */
+.nld-question-layout{display:grid;grid-template-columns:minmax(300px,38%) minmax(620px,62%);gap:22px;align-items:start;width:100%}
+.nld-prompt-pane{font-size:22px;line-height:1.22;padding:4px 8px 0 0}
+.number-line-drag{width:100%;border:1px solid #aeb8c5;border-radius:6px;overflow:hidden;background:#fff}
+.nld-toolbar{height:52px;background:#b2bcc9;border-bottom:2px solid #8eddf2;display:flex;align-items:center;padding:0 10px}.nld-clear{width:42px;height:42px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer}
+.nld-stage{height:360px;position:relative;padding:0 48px}.nld-line-wrap{position:absolute;left:7%;right:7%;top:47%;height:105px}.nld-axis{position:absolute;left:0;right:0;top:38px;border-top:2px solid #555}.nld-arrow{position:absolute;top:-8px;width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent}.nld-arrow.left{left:-2px;border-right:18px solid #444}.nld-arrow.right{right:-2px;border-left:18px solid #444}
+.nld-ticks,.nld-drop-layer{position:absolute;left:7%;right:7%;display:grid;grid-template-columns:repeat(17,1fr)}.nld-ticks{top:calc(47% + 38px);transform:translateY(-38px)}
+.nld-ticks>span{height:28px;border-left:2px solid #777;position:relative;justify-self:center}.nld-ticks>span.major{height:38px}.nld-ticks b{position:absolute;top:43px;left:50%;transform:translateX(-50%);font-size:20px;font-weight:400;color:#444}
+.nld-drop-layer{top:calc(47% - 40px);height:100px;align-items:center}.nld-drop{height:100px;min-width:34px;position:relative;display:flex;justify-content:center;align-items:flex-start;padding-top:0}
+.nld-drop .nld-token.placed{position:relative;top:-40px;opacity:1;margin:0;pointer-events:none}
+.nld-bank{height:150px;border-top:3px solid #8eddf2;display:flex;justify-content:flex-end;align-items:center;gap:90px;padding:0 70px}.nld-token{border:0;background:transparent;min-width:55px;min-height:70px;font-size:23px;cursor:grab;color:#222}.nld-token.used{visibility:hidden}.nld-token.selected{outline:3px solid #a0caff;border-radius:3px}.frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1}.frac span:first-child{border-bottom:2px solid currentColor;padding:0 4px 2px}.frac span:last-child{padding-top:2px}
+@media(max-width:900px){.nld-question-layout{grid-template-columns:1fr}.nld-prompt-pane{font-size:19px}.nld-bank{gap:35px;padding:0 30px}}
+/* Keep ticks and drop targets exactly aligned with the axis endpoints. */
+.nld-line-wrap .nld-ticks,.nld-line-wrap .nld-drop-layer{left:0;right:0}
+/* Number-line drag fixes: stable four-item bank and return-to-bank behavior */
+.nld-bank{position:relative}
+.nld-bank .nld-token{flex:0 0 55px}
+.nld-bank .nld-token.used{visibility:hidden;pointer-events:none}
+.nld-drop .nld-token.placed{visibility:visible!important;display:flex!important;align-items:center;justify-content:center;cursor:grab;pointer-events:auto!important}
+.nld-drop .nld-token.placed:active{cursor:grabbing}

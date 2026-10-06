@@ -34,7 +34,7 @@
     }
 
     function sync() {
-      if (hidden) hidden.value = serialize();
+      if (hidden) { hidden.value = serialize(); hidden.dispatchEvent(new Event('input', { bubbles: true })); }
       const error = widget.closest('.mstep-question-box')?.querySelector('.question-error');
       if (error && hidden?.value.trim()) error.hidden = true;
     }

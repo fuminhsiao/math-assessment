@@ -22,26 +22,26 @@
 
     <div class="mstep-toolbar-row">
       <div class="mstep-nav-buttons" aria-label="Question navigation">
-        <button type="button" class="mstep-arrow-button" id="back-button" aria-label="Previous question" title="Previous question">
-          <span aria-hidden="true">←</span>
+        <button type="button" class="mstep-tooltip mstep-arrow-button" id="back-button" aria-label="Previous question" data-tooltip="Previous">
+          <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g transform="translate(24 0) scale(-1 1)"><path d="M5,13h11.17l-4.88,4.88c-0.39,0.39-0.39,1.03,0,1.42l0,0c0.39,0.39,1.02,0.39,1.41,0l6.59-6.59 c0.39-0.39,0.39-1.02,0-1.41l-6.58-6.6c-0.39-0.39-1.02-0.39-1.41,0l0,0c-0.39,0.39-0.39,1.02,0,1.41L16.17,11H5 c-0.55,0-1,0.45-1,1l0,0C4,12.55,4.45,13,5,13z" fill="#002A5F"></path></g></svg>
         </button>
-        <button type="button" class="mstep-arrow-button" id="next-button" aria-label="Next question" title="Next question">
-          <span aria-hidden="true">→</span>
+        <button type="button" class="mstep-tooltip mstep-arrow-button" id="next-button" aria-label="Next question" data-tooltip="Next">
+          <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5,13h11.17l-4.88,4.88c-0.39,0.39-0.39,1.03,0,1.42l0,0c0.39,0.39,1.02,0.39,1.41,0l6.59-6.59 c0.39-0.39,0.39-1.02,0-1.41l-6.58-6.6c-0.39-0.39-1.02-0.39-1.41,0l0,0c-0.39,0.39-0.39,1.02,0,1.41L16.17,11H5 c-0.55,0-1,0.45-1,1l0,0C4,12.55,4.45,13,5,13z" fill="#002A5F"></path></svg>
         </button>
       </div>
 
       <div class="mstep-toolbox" aria-label="Assessment tools" id="assessment-toolbox">
-        <button type="button" class="mstep-tool-button active" id="pointer-tool" aria-label="Pointer" title="Pointer"><span class="tool-pointer-icon">➤</span></button>
+        <button type="button" class="mstep-tooltip mstep-tool-button active" id="pointer-tool" aria-label="Pointer" data-tooltip="Pointer"><svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true" focusable="false" ><path d="M17.3972 27.141L17.3974 27.1424C17.4831 27.6893 17.8689 28.0738 18.3146 28.2093C18.7642 28.3459 19.3091 28.2331 19.6381 27.7612C19.6383 27.761 19.6384 27.7608 19.6386 27.7606L21.1379 25.6163L23.5862 29.7523C24.012 30.4716 24.9441 30.7089 25.6686 30.3009C26.4002 29.889 26.6608 28.9654 26.2305 28.2384L23.79 24.1156L26.3865 23.9341C26.3869 23.934 26.3874 23.934 26.3879 23.934C26.9653 23.8959 27.3448 23.4855 27.4603 23.0282C27.5748 22.5753 27.4447 22.0438 27.0183 21.6883L27.0175 21.6876L17.5093 13.7916L17.5093 13.7915L17.5025 13.7861C16.616 13.0758 15.3425 13.7757 15.5153 14.92L15.5153 14.92L15.5155 14.9214L17.3972 27.141Z" fill="#002A5F"></path></svg></button>
         <div class="mstep-tool-menu-wrap">
-          <button type="button" class="mstep-tool-button" id="highlighter-tool" aria-label="Highlighter" title="Highlighter"><span class="tool-highlighter-icon">▰</span></button>
+          <button type="button" class="mstep-tooltip mstep-tool-button" id="highlighter-tool" aria-label="Highlighter" data-tooltip="Highlighter"><svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true" focusable="false"><path d="M15.5197 25.8394L13.1197 29.0394C12.8197 29.5394 13.1197 30.1394 13.6197 30.1394H15.6197C15.8197 30.1394 15.9197 30.0394 16.1197 29.9394L18.2197 27.9394L15.5197 25.8394Z" fill="#A0CAFF"></path><path d="M24.7196 26.4394L22.7196 28.4394C22.1196 29.0394 22.5196 30.1394 23.4196 30.1394H29.0196C30.1196 30.1394 31.0196 29.2394 31.0196 28.1394C31.0196 27.0394 30.1196 26.1394 29.0196 26.1394H25.4196C25.2196 26.1394 24.9196 26.2394 24.7196 26.4394Z" fill="#A0CAFF"></path><path d="M29.1196 16.9394L25.3196 14.1394C25.0196 13.9394 24.6196 13.9394 24.3196 14.2394L16.6196 24.4394L19.6196 26.7394L29.1196 17.9394C29.5196 17.6394 29.5196 17.1394 29.1196 16.9394Z" fill="#002A5F"></path></svg></button>
           <div class="mstep-tool-menu highlighter-menu" id="highlighter-menu" hidden>
             <button type="button" id="use-highlighter">Use Highlighter<span class="highlighter-swatch"></span></button>
             <button type="button" id="clear-highlights">Clear All</button>
           </div>
         </div>
-        <button type="button" class="mstep-tool-button" id="notepad-tool" aria-label="Notepad" title="Notepad"><span class="tool-note-icon">◩</span></button>
+        <button type="button" class="mstep-tooltip mstep-tool-button" id="notepad-tool" aria-label="Notepad" data-tooltip="Notepad"><svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true" focusable="false" ><path d="M29 13H14.99C13.89 13 13 13.9 13 15L13.01 29C13.01 30.1 13.9 31 15 31H25L31 25V15C31 13.9 30.1 13 29 13ZM24 29.5V25C24 24.45 24.45 24 25 24H29.5L24 29.5Z" fill="#002A5F"></path></svg></button>
         <div class="mstep-tool-menu-wrap">
-          <button type="button" class="mstep-tool-button" id="magnifier-tool" aria-label="Magnifier" title="Magnifier"><span class="tool-magnifier-icon">⌕</span></button>
+          <button type="button" class="mstep-tooltip mstep-tool-button" id="magnifier-tool" aria-label="Magnifier" data-tooltip="Magnifier"><svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true" focusable="false" ><path d="M25.4989 24.0006H24.7089L24.4289 23.7306C25.6289 22.3306 26.2489 20.4206 25.9089 18.3906C25.4389 15.6106 23.1189 13.3906 20.3189 13.0506C16.0889 12.5306 12.5389 16.0906 13.0489 20.3206C13.3889 23.1206 15.6089 25.4406 18.3889 25.9106C20.4189 26.2506 22.3289 25.6306 23.7289 24.4306L23.9989 24.7106V25.5006L28.2589 29.7506C28.6689 30.1606 29.3289 30.1606 29.7389 29.7506L29.7489 29.7406C30.1589 29.3306 30.1589 28.6706 29.7489 28.2606L25.4989 24.0006ZM19.4989 24.0006C17.0089 24.0006 14.9989 21.9906 14.9989 19.5006C14.9989 17.0106 17.0089 15.0006 19.4989 15.0006C21.9889 15.0006 23.9989 17.0106 23.9989 19.5006C23.9989 21.9906 21.9889 24.0006 19.4989 24.0006ZM19.4989 17.0006C19.2189 17.0006 18.9989 17.2206 18.9989 17.5006V19.0006H17.4989C17.2189 19.0006 16.9989 19.2206 16.9989 19.5006C16.9989 19.7806 17.2189 20.0006 17.4989 20.0006H18.9989V21.5006C18.9989 21.7806 19.2189 22.0006 19.4989 22.0006C19.7789 22.0006 19.9989 21.7806 19.9989 21.5006V20.0006H21.4989C21.7789 20.0006 21.9989 19.7806 21.9989 19.5006C21.9989 19.2206 21.7789 19.0006 21.4989 19.0006H19.9989V17.5006C19.9989 17.2206 19.7789 17.0006 19.4989 17.0006Z" fill="#002A5F"></path></svg></button>
           <div class="mstep-tool-menu magnifier-menu" id="magnifier-menu" hidden>
             <button type="button" data-zoom="1">Off</button>
             <button type="button" data-zoom="1.5">× 1.5</button>
@@ -50,7 +50,7 @@
             <button type="button" data-zoom="4">× 4.0</button>
           </div>
         </div>
-        <button type="button" class="mstep-tool-button" id="line-guide-tool" aria-label="Line Guide" title="Line Guide"><span class="tool-line-icon">☰</span></button>
+        <button type="button" class="mstep-tooltip mstep-tool-button" id="line-guide-tool" aria-label="Line Guide" data-tooltip="Line Guide"><svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true" focusable="false" ><path d="M14 28H25C25.55 28 26 27.55 26 27C26 26.45 25.55 26 25 26H14C13.45 26 13 26.45 13 27C13 27.55 13.45 28 14 28ZM14 23H22C22.55 23 23 22.55 23 22C23 21.45 22.55 21 22 21H14C13.45 21 13 21.45 13 22C13 22.55 13.45 23 14 23ZM13 17C13 17.55 13.45 18 14 18H25C25.55 18 26 17.55 26 17C26 16.45 25.55 16 25 16H14C13.45 16 13 16.45 13 17ZM30.3 24.88L27.42 22L30.3 19.12C30.69 18.73 30.69 18.1 30.3 17.71C29.91 17.32 29.28 17.32 28.89 17.71L25.3 21.3C24.91 21.69 24.91 22.32 25.3 22.71L28.89 26.3C29.28 26.69 29.91 26.69 30.3 26.3C30.68 25.91 30.69 25.27 30.3 24.88Z" fill="#002A5F"></path></svg></button>
       </div>
     </div>
 
@@ -72,7 +72,7 @@
         {% for item in items %}{% with q=item.question %}
           <section class="mstep-question-screen{% if forloop.first %} active{% endif %}" data-screen="question" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
             <div class="mstep-question-box">
-              <div class="mstep-question-prompt">{{ q.prompt }}</div>
+              {% if q.question_type != 'equation_builder' and q.question_type != 'number_line_drag' %}<div class="mstep-question-prompt">{{ q.prompt }}</div>{% endif %}
 
               {% if q.question_type == 'multiple_choice' %}
                 <div class="mstep-options" role="radiogroup" aria-label="Answer choices">
@@ -85,16 +85,60 @@
                   {% endfor %}
                 </div>
 
+              {% elif q.question_type == 'multi_select' %}
+                <div class="mstep-options mstep-multi-select" aria-label="Select all that apply">
+                  {% for choice in q.choices.all %}
+                    <label class="mstep-option-row">
+                      <input type="checkbox" class="multi-select-choice" data-value="{{ choice.value }}">
+                      <span class="mstep-option-letter"></span>
+                      <span class="mstep-option-text">{{ choice.text }}</span>
+                    </label>
+                  {% endfor %}
+                  <input type="hidden" name="answer_{{ q.id }}" class="multi-select-answer" value="">
+                </div>
+
+
+              {% elif q.question_type == 'yes_no_matrix' %}
+                <div class="mstep-yn-matrix" data-yn-matrix>
+                  <div class="yn-toolbar">
+                    <button type="button" class="yn-clear mstep-tooltip" data-tooltip="Clear All" aria-label="Clear All">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.34315 6.34321L5.07742 5.07748C4.75923 4.75929 4.22182 4.98556 4.2289 5.43104L4.22183 9.38376C4.22183 9.66661 4.44103 9.88581 4.72387 9.88581L8.66953 9.88581C9.115 9.87874 9.34128 9.34134 9.02308 9.02314L7.75736 7.75742C10.0979 5.4169 13.9021 5.4169 16.2426 7.75742C16.8013 8.31603 17.2397 8.96657 17.5225 9.65954C17.671 10.0202 18.0387 10.2323 18.4205 10.2323C19.1418 10.2323 19.6226 9.4969 19.3398 8.83222C18.9579 7.92712 18.3922 7.0786 17.6569 6.34321C14.5314 3.21779 9.46856 3.21779 6.34315 6.34321ZM16.2426 16.2427C13.9021 18.5832 10.0979 18.5832 7.75736 16.2427C7.19874 15.6841 6.76034 15.0335 6.4775 14.3406C6.329 13.98 5.96131 13.7678 5.57947 13.7678C4.85822 13.7678 4.37739 14.5032 4.66023 15.1679C5.04207 16.073 5.60775 16.9215 6.34315 17.6569C9.46856 20.7823 14.5314 20.7823 17.6569 17.6569L18.9226 18.9226C19.2408 19.2408 19.7782 19.0146 19.7711 18.5691L19.7711 14.6234C19.7711 14.3406 19.5519 14.1214 19.2691 14.1214L15.3234 14.1214C14.885 14.1214 14.6587 14.6588 14.9769 14.977L16.2426 16.2427Z" fill="#002A5F"/></svg>
+                    </button>
+                  </div>
+                  <table class="yn-table">
+                    <thead><tr><th class="yn-blank"></th><th>Yes</th><th>No</th></tr></thead>
+                    <tbody>{% for choice in q.choices.all %}<tr data-row-value="{{ choice.value }}"><th>{{ choice.text }}</th><td><button type="button" class="yn-cell" data-answer="yes" aria-label="Yes for {{ choice.text }}"><span>✓</span></button></td><td><button type="button" class="yn-cell" data-answer="no" aria-label="No for {{ choice.text }}"><span>✓</span></button></td></tr>{% endfor %}</tbody>
+                  </table>
+                  <input type="hidden" name="answer_{{ q.id }}" class="yn-answer" value="">
+                </div>
+
+              {% elif q.question_type == 'grid_line_drawing' %}
+                <div class="grid-drawing-widget" data-grid-drawing data-question-id="{{ q.id }}">
+                  <div class="grid-drawing-toolbar" role="toolbar" aria-label="Drawing tools">
+                    <button type="button" class="grid-tool mstep-tooltip" data-grid-action="clear" data-tooltip="Clear All" aria-label="Clear All"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6.34315 6.34321L5.07742 5.07748C4.75923 4.75929 4.22182 4.98556 4.2289 5.43104L4.22183 9.38376C4.22183 9.66661 4.44103 9.88581 4.72387 9.88581L8.66953 9.88581C9.115 9.87874 9.34128 9.34134 9.02308 9.02314L7.75736 7.75742C10.0979 5.4169 13.9021 5.4169 16.2426 7.75742C16.8013 8.31603 17.2397 8.96657 17.5225 9.65954C17.671 10.0202 18.0387 10.2323 18.4205 10.2323C19.1418 10.2323 19.6226 9.4969 19.3398 8.83222C18.9579 7.92712 18.3922 7.0786 17.6569 6.34321C14.5314 3.21779 9.46856 3.21779 6.34315 6.34321ZM16.2426 16.2427C13.9021 18.5832 10.0979 18.5832 7.75736 16.2427C7.19874 15.6841 6.76034 15.0335 6.4775 14.3406C6.329 13.98 5.96131 13.7678 5.57947 13.7678C4.85822 13.7678 4.37739 14.5032 4.66023 15.1679C5.04207 16.073 5.60775 16.9215 6.34315 17.6569C9.46856 20.7823 14.5314 20.7823 17.6569 17.6569L18.9226 18.9226C19.2408 19.2408 19.7782 19.0146 19.7711 18.5691L19.7711 14.6234C19.7711 14.3406 19.5519 14.1214 19.2691 14.1214L15.3234 14.1214C14.885 14.1214 14.6587 14.6588 14.9769 14.977L16.2426 16.2427Z" fill="#002A5F"/></svg></button>
+                    <button type="button" class="grid-tool mstep-tooltip" data-grid-action="undo" data-tooltip="Undo" aria-label="Undo"><svg width="21" height="8" viewBox="0 0 21 8"><path d="M10.5 0C7.85 0 5.45.99 3.6 2.6L1.71.71C1.08.08 0 .52 0 1.41V7c0 .55.45 1 1 1h5.59c.89 0 1.34-1.08.71-1.71L5.39 4.38C6.78 3.22 8.55 2.5 10.51 2.5c3.16 0 5.89 1.84 7.19 4.5.27.56.91.84 1.5.64.71-.23 1.07-1.04.75-1.72C18.23 2.42 14.65 0 10.5 0Z" fill="#002A5F"/></svg></button>
+                    <button type="button" class="grid-tool mstep-tooltip" data-grid-action="redo" data-tooltip="Redo" aria-label="Redo"><svg width="21" height="8" viewBox="0 0 21 8"><path d="M9.57 0c2.65 0 5.05.99 6.9 2.6L18.36.71c.63-.63 1.71-.19 1.71.7V7c0 .55-.45 1-1 1h-5.59c-.89 0-1.34-1.08-.71-1.71l1.91-1.91C13.29 3.22 11.52 2.5 9.56 2.5 6.4 2.5 3.67 4.34 2.37 7c-.27.56-.91.84-1.5.64-.71-.23-1.07-1.04-.75-1.72C1.84 2.42 5.42 0 9.57 0Z" fill="#002A5F"/></svg></button>
+                    <span class="grid-toolbar-sep"></span><span class="grid-line-dot" aria-hidden="true"></span><span class="grid-toolbar-sep"></span>
+                    <select class="grid-line-type" aria-label="Line Type"><option value="straight">Straight Line</option></select><span class="grid-toolbar-sep"></span><select class="grid-line-width" aria-label="Line width"><option value="2">━</option><option value="3">━</option><option value="4">━</option></select><span class="grid-toolbar-sep"></span>
+                  </div>
+                  <svg class="grid-drawing-svg" viewBox="0 0 460 460" role="application" aria-label="20 by 20 drawing grid. Click two grid intersections to draw a line.">
+                    <defs><pattern id="grid-pattern-{{ q.id }}" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#aaaaaa" stroke-width="1"/></pattern></defs>
+                    <rect x="30" y="20" width="400" height="400" fill="url(#grid-pattern-{{ q.id }})" stroke="#111" stroke-width="1.5"/>
+                    <g class="grid-user-lines"></g><g class="grid-preview"></g>
+                  </svg>
+                  <input type="hidden" name="answer_{{ q.id }}" class="grid-drawing-answer" value="">
+                </div>
+
               {% elif q.question_type == 'mathlive' %}
                 <div class="mstep-value-answer">
-                  <div class="value-input-widget" data-value-input data-initial="{{ request.POST|get_item:q.id|escape }}">
-                    <div class="vi-toolbar" aria-label="Value input editing tools">
-                      <button type="button" class="vi-tool" data-action="clear" title="Clear all" aria-label="Clear all"><span class="vi-icon vi-clear">↻</span></button>
-                      <button type="button" class="vi-tool" data-action="undo" title="Undo" aria-label="Undo"><span class="vi-icon">↶</span></button>
-                      <button type="button" class="vi-tool" data-action="redo" title="Redo" aria-label="Redo"><span class="vi-icon">↷</span></button>
-                      <button type="button" class="vi-tool" data-action="left" title="Go left" aria-label="Go left"><span class="vi-icon">←</span></button>
-                      <button type="button" class="vi-tool" data-action="right" title="Go right" aria-label="Go right"><span class="vi-icon">→</span></button>
-                      <button type="button" class="vi-tool" data-action="backspace" title="Backspace" aria-label="Backspace"><span class="vi-backspace-icon">×</span></button>
+                  <div class="value-input-widget eqinput inputtype" data-value-input data-initial="{{ request.POST|get_item:q.id|escape }}">
+                    <div class="vi-toolbar eq-toolbar input-toolbar" aria-label="Value input editing tools">
+                      <button type="button" class="vi-tool mstep-tooltip toolbar-button btn kb-focusable reset" data-action="clear" data-tooltip="Clear All" aria-label="Clear All" data-tool="reset" data-tooltip-title="Clear All" data-tts="reset all"><svg class="vi-action-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M6.34315 6.34321L5.07742 5.07748C4.75923 4.75929 4.22182 4.98556 4.2289 5.43104L4.22183 9.38376C4.22183 9.66661 4.44103 9.88581 4.72387 9.88581L8.66953 9.88581C9.115 9.87874 9.34128 9.34134 9.02308 9.02314L7.75736 7.75742C10.0979 5.4169 13.9021 5.4169 16.2426 7.75742C16.8013 8.31603 17.2397 8.96657 17.5225 9.65954C17.671 10.0202 18.0387 10.2323 18.4205 10.2323C19.1418 10.2323 19.6226 9.4969 19.3398 8.83222C18.9579 7.92712 18.3922 7.0786 17.6569 6.34321C14.5314 3.21779 9.46856 3.21779 6.34315 6.34321ZM16.2426 16.2427C13.9021 18.5832 10.0979 18.5832 7.75736 16.2427C7.19874 15.6841 6.76034 15.0335 6.4775 14.3406C6.329 13.98 5.96131 13.7678 5.57947 13.7678C4.85822 13.7678 4.37739 14.5032 4.66023 15.1679C5.04207 16.073 5.60775 16.9215 6.34315 17.6569C9.46856 20.7823 14.5314 20.7823 17.6569 17.6569L18.9226 18.9226C19.2408 19.2408 19.7782 19.0146 19.7711 18.5691L19.7711 14.6234C19.7711 14.3406 19.5519 14.1214 19.2691 14.1214L15.3234 14.1214C14.885 14.1214 14.6587 14.6588 14.9769 14.977L16.2426 16.2427V16.2427Z" fill="#002A5F"></path></svg></button>
+                      <button type="button" class="vi-tool mstep-tooltip toolbar-button btn kb-focusable undo" data-action="undo" data-tooltip="Undo" aria-label="Undo" data-tool="undo" data-tooltip-title="Undo" data-tts="undo"><svg class="vi-action-svg" width="21" height="8" viewBox="0 0 21 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M10.5 0C7.85 0 5.45 0.99 3.6 2.6L1.71 0.71C1.08 0.08 0 0.52 0 1.41V7C0 7.55 0.45 8 1 8H6.59C7.48 8 7.93 6.92 7.3 6.29L5.39 4.38C6.78 3.22 8.55 2.5 10.51 2.5C13.67 2.5 16.4 4.34 17.7 7C17.97 7.56 18.61 7.84 19.2 7.64C19.91 7.41 20.27 6.6 19.95 5.92C18.23 2.42 14.65 0 10.5 0Z" fill="#002A5F"></path></svg></button>
+                      <button type="button" class="vi-tool mstep-tooltip toolbar-button btn kb-focusable redo" data-action="redo" data-tooltip="Redo" aria-label="Redo" data-tool="redo" data-tooltip-title="Redo" data-tts="redo"><svg class="vi-action-svg" width="21" height="8" viewBox="0 0 21 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M9.56763 0C12.2176 0 14.6176 0.99 16.4676 2.6L18.3576 0.71C18.9876 0.08 20.0676 0.52 20.0676 1.41V7C20.0676 7.55 19.6176 8 19.0676 8H13.4776C12.5876 8 12.1376 6.92 12.7676 6.29L14.6776 4.38C13.2876 3.22 11.5176 2.5 9.55763 2.5C6.39763 2.5 3.66763 4.34 2.36763 7C2.09763 7.56 1.45763 7.84 0.867626 7.64C0.157626 7.41 -0.202374 6.6 0.117626 5.92C1.83763 2.42 5.41763 0 9.56763 0Z" fill="#002A5F"></path></svg></button>
+                      <button type="button" class="vi-tool mstep-tooltip toolbar-button btn kb-focusable leftarrow" data-action="left" data-tooltip="Go Left" aria-label="Go Left" data-tool="leftarrow" data-tooltip-title="Go Left" data-tts="leftarrow"><svg class="vi-action-svg" width="17" height="10" viewBox="-2 0 20 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M0.315659 4.22446L4.17327 0.315314C4.83949 -0.359804 6 0.119312 6 1.08843V3.75H15.75C16.4404 3.75 17 4.30964 17 5C17 5.69036 16.4404 6.25 15.75 6.25H6V8.90673C6 9.87585 4.83949 10.3659 4.16253 9.67985L0.304916 5.7707C-0.103411 5.34603 -0.103413 4.64913 0.315659 4.22446Z" fill="#002A5F"></path></svg></button>
+                      <button type="button" class="vi-tool mstep-tooltip toolbar-button btn kb-focusable rightarrow" data-action="right" data-tooltip="Go Right" aria-label="Go Right" data-tool="rightarrow" data-tooltip-title="Go Right" data-tts="rightarrow"><svg class="vi-action-svg" width="17" height="10" viewBox="-2 0 20 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M16.6843 4.22446L12.8267 0.315314C12.1605 -0.359804 11 0.119312 11 1.08843V3.75H1.25C0.559644 3.75 0 4.30964 0 5C0 5.69036 0.559644 6.25 1.25 6.25H11V8.90673C11 9.87585 12.1605 10.3659 12.8375 9.67985L16.6951 5.7707C17.1034 5.34603 17.1034 4.64913 16.6843 4.22446Z" fill="#002A5F"></path></svg></button>
+                      <button type="button" class="vi-tool mstep-tooltip toolbar-button btn kb-focusable backspace" data-action="backspace" data-tooltip="Backspace" aria-label="Backspace" data-tool="backspace" data-tooltip-title="Backspace" data-tts="backspace"><svg class="vi-action-svg" width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M18.319 0H5.71128C5.13133 0 4.67745 0.272222 4.37487 0.684445L0.138685 6.57222C-0.0462282 6.83667 -0.0462282 7.17111 0.138685 7.43556L4.37487 13.3156C4.67745 13.72 5.13133 14 5.71128 14H18.319C19.2435 14 20 13.3 20 12.4444V1.55556C20 0.7 19.2435 0 18.319 0ZM15.2091 10.3444C14.8813 10.6478 14.3518 10.6478 14.024 10.3444L11.5949 8.09667L9.16579 10.3444C8.83799 10.6478 8.30847 10.6478 7.98067 10.3444C7.65287 10.0411 7.65287 9.55111 7.98067 9.24778L10.4097 7L7.98067 4.75222C7.65287 4.44889 7.65287 3.95889 7.98067 3.65556C8.30847 3.35222 8.83799 3.35222 9.16579 3.65556L11.5949 5.90333L14.024 3.65556C14.3518 3.35222 14.8813 3.35222 15.2091 3.65556C15.5369 3.95889 15.5369 4.44889 15.2091 4.75222L12.78 7L15.2091 9.24778C15.5285 9.54333 15.5285 10.0411 15.2091 10.3444Z" fill="#002A5F"></path></svg></button>
                     </div>
 
                     <div class="vi-display" data-display tabindex="0" role="textbox" aria-label="Answer input"></div>
@@ -112,6 +156,52 @@
                     </div>
                   </div>
                   <input type="hidden" name="answer_{{ q.id }}" id="answer-{{ q.id }}" value="{{ request.POST|get_item:q.id }}">
+                </div>
+
+
+              {% elif q.question_type == 'equation_builder' %}
+                <div class="eqb-question-layout">
+                  <div class="eqb-prompt-pane">
+                    <p>Christy has $60 to spend on plants.<br>She buys a peach tree for $23 and a plum tree for $19.</p>
+                    <p>She wants to buy one more plant.</p>
+                    <ul>
+                      <li>Drag the numbers to the boxes and the symbols to the circles to create an equation to show how much money Christy has left to spend.</li>
+                      <li>Select one plant she <strong>could</strong> buy with the money she has left.</li>
+                    </ul>
+                  </div>
+                  <div class="equation-builder" data-equation-builder>
+                  <div class="eqb-toolbar"><button type="button" class="eqb-clear mstep-tooltip" data-tooltip="Clear All" aria-label="Clear All"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6.34315 6.34321L5.07742 5.07748C4.75923 4.75929 4.22182 4.98556 4.2289 5.43104L4.22183 9.38376C4.22183 9.66661 4.44103 9.88581 4.72387 9.88581L8.66953 9.88581C9.115 9.87874 9.34128 9.34134 9.02308 9.02314L7.75736 7.75742C10.0979 5.4169 13.9021 5.4169 16.2426 7.75742C16.8013 8.31603 17.2397 8.96657 17.5225 9.65954C17.671 10.0202 18.0387 10.2323 18.4205 10.2323C19.1418 10.2323 19.6226 9.4969 19.3398 8.83222C18.9579 7.92712 18.3922 7.0786 17.6569 6.34321C14.5314 3.21779 9.46856 3.21779 6.34315 6.34321ZM16.2426 16.2427C13.9021 18.5832 10.0979 18.5832 7.75736 16.2427C7.19874 15.6841 6.76034 15.0335 6.4775 14.3406C6.329 13.98 5.96131 13.7678 5.57947 13.7678C4.85822 13.7678 4.37739 14.5032 4.66023 15.1679C5.04207 16.073 5.60775 16.9215 6.34315 17.6569C9.46856 20.7823 14.5314 20.7823 17.6569 17.6569L18.9226 18.9226C19.2408 19.2408 19.7782 19.0146 19.7711 18.5691L19.7711 14.6234C19.7711 14.3406 19.5519 14.1214 19.2691 14.1214L15.3234 14.1214C14.885 14.1214 14.6587 14.6588 14.9769 14.977L16.2426 16.2427Z" fill="#002A5F"/></svg></button></div>
+                  <div class="eqb-workspace">
+                    <div class="eqb-bank">
+                      {% for op in q.drag_config.operators %}<button type="button" draggable="true" class="eqb-token operator" data-kind="operator" data-value="{{ op }}">{{ op }}</button>{% endfor %}
+                      {% for num in q.drag_config.numbers %}<button type="button" draggable="true" class="eqb-token number" data-kind="number" data-value="{{ num }}">{{ num }}</button>{% endfor %}
+                    </div>
+                    <div class="eqb-equation" aria-label="Build an equation">
+                      <div class="eqb-slot square" data-slot="0" data-kind="number"></div><div class="eqb-slot circle" data-slot="1" data-kind="operator"></div><div class="eqb-slot square" data-slot="2" data-kind="number"></div><div class="eqb-slot circle" data-slot="3" data-kind="operator"></div><div class="eqb-slot square" data-slot="4" data-kind="number"></div><span class="eqb-equals">=</span><div class="eqb-slot square" data-slot="5" data-kind="number"></div>
+                    </div>
+                  </div>
+                  <div class="eqb-plants" role="radiogroup" aria-label="Select one plant">{% for plant in q.drag_config.plants %}<label><input type="radio" name="eqb_plant_{{ q.id }}" value="{{ plant.0 }}"><span></span>{{ plant.1 }}</label>{% endfor %}</div>
+                  <input type="hidden" name="answer_{{ q.id }}" class="eqb-answer" value="">
+                  </div>
+                </div>
+
+              {% elif q.question_type == 'number_line_drag' %}
+                <div class="nld-question-layout">
+                  <div class="nld-prompt-pane">{{ q.prompt|linebreaksbr }}</div>
+                  <div class="number-line-drag" data-number-line-drag>
+                    <div class="nld-toolbar"><button type="button" class="nld-clear mstep-tooltip" data-tooltip="Clear All" aria-label="Clear All"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6.34315 6.34321L5.07742 5.07748C4.75923 4.75929 4.22182 4.98556 4.2289 5.43104L4.22183 9.38376C4.22183 9.66661 4.44103 9.88581 4.72387 9.88581L8.66953 9.88581C9.115 9.87874 9.34128 9.34134 9.02308 9.02314L7.75736 7.75742C10.0979 5.4169 13.9021 5.4169 16.2426 7.75742C16.8013 8.31603 17.2397 8.96657 17.5225 9.65954C17.671 10.0202 18.0387 10.2323 18.4205 10.2323C19.1418 10.2323 19.6226 9.4969 19.3398 8.83222C18.9579 7.92712 18.3922 7.0786 17.6569 6.34321C14.5314 3.21779 9.46856 3.21779 6.34315 6.34321ZM16.2426 16.2427C13.9021 18.5832 10.0979 18.5832 7.75736 16.2427C7.19874 15.6841 6.76034 15.0335 6.4775 14.3406C6.329 13.98 5.96131 13.7678 5.57947 13.7678C4.85822 13.7678 4.37739 14.5032 4.66023 15.1679C5.04207 16.073 5.60775 16.9215 6.34315 17.6569C9.46856 20.7823 14.5314 20.7823 17.6569 17.6569L18.9226 18.9226C19.2408 19.2408 19.7782 19.0146 19.7711 18.5691L19.7711 14.6234C19.7711 14.3406 19.5519 14.1214 19.2691 14.1214L15.3234 14.1214C14.885 14.1214 14.6587 14.6588 14.9769 14.977L16.2426 16.2427Z" fill="#002A5F"/></svg></button></div>
+                    <div class="nld-stage">
+                      <div class="nld-line-wrap">
+                        <div class="nld-axis"><span class="nld-arrow left"></span><span class="nld-arrow right"></span></div>
+                        <div class="nld-ticks">
+                          <span class="major" data-pos="0"><b>0</b></span><span data-pos="0.25"></span><span data-pos="0.5"></span><span data-pos="0.75"></span><span class="major" data-pos="1"><b>1</b></span><span data-pos="1.25"></span><span data-pos="1.5"></span><span data-pos="1.75"></span><span class="major" data-pos="2"><b>2</b></span><span data-pos="2.25"></span><span data-pos="2.5"></span><span data-pos="2.75"></span><span class="major" data-pos="3"><b>3</b></span><span data-pos="3.25"></span><span data-pos="3.5"></span><span data-pos="3.75"></span><span class="major" data-pos="4"><b>4</b></span>
+                        </div>
+                        <div class="nld-drop-layer">{% for x in q.drag_config.positions %}<div class="nld-drop" data-position="{{ x }}"></div>{% endfor %}</div>
+                      </div>
+                    </div>
+                    <div class="nld-bank">{% for choice in q.drag_config.choices %}<button type="button" draggable="true" class="nld-token" data-value="{{ choice.value }}"><span class="frac"><span>{{ choice.n }}</span><span>{{ choice.d }}</span></span></button>{% endfor %}</div>
+                    <input type="hidden" name="answer_{{ q.id }}" class="nld-answer" value="">
+                  </div>
                 </div>
 
               {% elif q.question_type == 'drag_drop_image' %}
@@ -204,7 +294,7 @@
     currentIndex = index;
     questionStrip.textContent = `Question: ${index + 1}`;
     backButton.disabled = index === 0;
-    nextButton.disabled = false;
+    updateNavigationState();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -228,13 +318,35 @@
     const error = screen.querySelector('.question-error');
     const hidden = screen.querySelector('input[type="hidden"][name^="answer_"]');
     const radio = screen.querySelector('input[type="radio"]:checked');
+    const multi = screen.querySelectorAll('.multi-select-choice:checked');
     const dragQuestion = screen.querySelector('[data-drag-question]');
+    const ynMatrix = screen.querySelector('[data-yn-matrix]');
+    const numberLineDrag = screen.querySelector('[data-number-line-drag]');
+    if (numberLineDrag) {
+      const hidden = numberLineDrag.querySelector('.nld-answer');
+      try { return Object.keys(JSON.parse(hidden?.value || '{}')).length === 4; } catch (_) { return false; }
+    }
+
+    const gridDrawing = screen.querySelector('[data-grid-drawing]');
+    const equationBuilder = screen.querySelector('[data-equation-builder]');
     let complete = false;
 
-    if (dragQuestion) {
+    if (equationBuilder) {
+      try { const a=JSON.parse(hidden?.value||'{}'); complete=(a.slots||[]).length===6 && a.slots.every(Boolean) && !!a.plant; } catch (_) { complete=false; }
+    } else if (gridDrawing) {
+      try { complete = (JSON.parse(hidden?.value || '{}').lines || []).length > 0; } catch (_) { complete = false; }
+    } else if (ynMatrix) {
+      const rows = ynMatrix.querySelectorAll('tbody tr').length;
+      let values = {};
+      try { values = JSON.parse(hidden?.value || '{}'); } catch (_) {}
+      complete = rows > 0 && Object.keys(values).length === rows;
+    } else if (dragQuestion) {
       let placements = {};
       try { placements = JSON.parse(hidden?.value || '{}'); } catch (_) {}
-      complete = Object.keys(placements).length === dragQuestion.querySelectorAll('.mtest-drag-choice').length;
+      const totalChoices = dragQuestion.querySelectorAll('.mtest-drag-choice').length;
+      complete = totalChoices > 0 && Object.keys(placements).length === totalChoices;
+    } else if (multi.length) {
+      complete = true;
     } else {
       complete = hidden ? hidden.value.trim() !== '' : Boolean(radio);
     }
@@ -242,6 +354,292 @@
     if (error) error.hidden = complete;
     return complete;
   }
+
+
+  function currentScreenHasAnswer() {
+    if (currentIndex < 0 || currentIndex >= total) return false;
+    const screen = questionScreens[currentIndex];
+
+    const numberLineDrag = screen.querySelector('[data-number-line-drag]');
+    if (numberLineDrag) {
+      const h=numberLineDrag.querySelector('.nld-answer');
+      try { return Object.keys(JSON.parse(h?.value||'{}')).length===4; } catch (_) { return false; }
+    }
+
+    const equationBuilder = screen.querySelector('[data-equation-builder]');
+    if (equationBuilder) {
+      const h=equationBuilder.querySelector('.eqb-answer'); try { const a=JSON.parse(h?.value||'{}'); return (a.slots||[]).length===6 && a.slots.every(Boolean) && !!a.plant; } catch (_) { return false; }
+    }
+
+    const gridDrawing = screen.querySelector('[data-grid-drawing]');
+    if (gridDrawing) {
+      const hidden = gridDrawing.querySelector('.grid-drawing-answer');
+      try { return (JSON.parse(hidden?.value || '{}').lines || []).length > 0; } catch (_) { return false; }
+    }
+
+    const ynMatrix = screen.querySelector('[data-yn-matrix]');
+    if (ynMatrix) {
+      const hidden = ynMatrix.querySelector('.yn-answer');
+      let values = {};
+      try { values = JSON.parse(hidden?.value || '{}'); } catch (_) {}
+      return Object.keys(values).length === ynMatrix.querySelectorAll('tbody tr').length;
+    }
+
+    // Single-choice or multi-select: at least one choice must actually be selected.
+    if (screen.querySelector('input[type="radio"][name^="answer_"]:checked')) return true;
+    if (screen.querySelector('.multi-select-choice:checked')) return true;
+
+    // Numeric/value input: the serialized hidden answer must contain a value.
+    const hidden = screen.querySelector('input[type="hidden"][name^="answer_"]');
+    if (hidden) {
+      const raw = (hidden.value || "").trim();
+      if (!raw) return false;
+
+      const dragQuestion = screen.querySelector('[data-drag-question]');
+      if (dragQuestion) {
+        try { return Object.keys(JSON.parse(raw)).length > 0; }
+        catch (_) { return false; }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  function updateNavigationState() {
+    if (!nextButton) return;
+    const answered = currentScreenHasAnswer();
+
+    // The Next button is genuinely disabled until this question has an answer.
+    nextButton.disabled = !answered;
+    nextButton.setAttribute("aria-disabled", answered ? "false" : "true");
+    nextButton.classList.toggle("has-answer", answered);
+    nextButton.setAttribute("data-answered", answered ? "true" : "false");
+
+    // Match the reference behavior: no NEXT tooltip while disabled.
+    if (answered) {
+      nextButton.classList.add("mstep-tooltip");
+      nextButton.setAttribute("data-tooltip", "Next");
+    } else {
+      nextButton.classList.remove("mstep-tooltip");
+      nextButton.removeAttribute("data-tooltip");
+    }
+  }
+
+
+  function syncMultiSelectAnswer(screen) {
+    const hidden = screen.querySelector(".multi-select-answer");
+    if (!hidden) return;
+    const values = [...screen.querySelectorAll(".multi-select-choice:checked")].map(el => el.dataset.value);
+    hidden.value = values.length ? JSON.stringify(values) : "";
+    hidden.dispatchEvent(new Event("input", {bubbles:true}));
+  }
+  document.addEventListener("change", event => {
+    if (event.target.matches(".multi-select-choice")) {
+      const screen = event.target.closest(".mstep-question-screen");
+      syncMultiSelectAnswer(screen);
+      updateNavigationState();
+    }
+  });
+
+  document.addEventListener("change", event => {
+    if (event.target.matches('input[type="radio"][name^="answer_"]')) {
+      updateNavigationState();
+    }
+  });
+
+  document.addEventListener("input", event => {
+    if (event.target.matches('input[type="hidden"][name^="answer_"]')) {
+      updateNavigationState();
+    }
+  });
+
+  document.querySelectorAll('[data-yn-matrix]').forEach(matrix => {
+    const hidden = matrix.querySelector('.yn-answer');
+    const answers = {};
+    const sync = () => {
+      hidden.value = Object.keys(answers).length ? JSON.stringify(answers) : '';
+      hidden.dispatchEvent(new Event('input', {bubbles:true}));
+      updateNavigationState();
+    };
+    matrix.querySelectorAll('tbody tr').forEach(row => {
+      row.querySelectorAll('.yn-cell').forEach(button => {
+        button.addEventListener('click', () => {
+          const wasSelected = button.classList.contains('selected');
+          row.querySelectorAll('.yn-cell').forEach(b => b.classList.remove('selected'));
+          if (wasSelected) delete answers[row.dataset.rowValue];
+          else {
+            button.classList.add('selected');
+            answers[row.dataset.rowValue] = button.dataset.answer;
+          }
+          sync();
+        });
+      });
+    });
+    matrix.querySelector('.yn-clear').addEventListener('click', () => {
+      Object.keys(answers).forEach(k => delete answers[k]);
+      matrix.querySelectorAll('.yn-cell').forEach(b => b.classList.remove('selected'));
+      sync();
+    });
+  });
+
+
+
+
+  document.querySelectorAll('[data-number-line-drag]').forEach(widget => {
+    const hidden = widget.querySelector('.nld-answer');
+    const drops = [...widget.querySelectorAll('.nld-drop')];
+    const bank = widget.querySelector('.nld-bank');
+    const bankTokens = [...bank.querySelectorAll('.nld-token')];
+    const placements = {};
+    let selected = null;
+
+    const sync = () => {
+      hidden.value = Object.keys(placements).length ? JSON.stringify(placements) : '';
+      hidden.dispatchEvent(new Event('input', {bubbles:true}));
+      updateNavigationState();
+    };
+
+    const render = () => {
+      // Always rebuild the line from the placement map.  Each fraction has its
+      // own key, so all four can remain on the line at the same time.
+      drops.forEach(drop => {
+        drop.innerHTML = '';
+        const value = Object.keys(placements).find(
+          key => String(placements[key]) === String(drop.dataset.position)
+        );
+        if (!value) return;
+
+        const source = bankTokens.find(token => token.dataset.value === value);
+        if (!source) return;
+        const placed = source.cloneNode(true);
+        placed.classList.remove('used', 'selected');
+        placed.classList.add('placed');
+        placed.draggable = true;
+        placed.dataset.value = value;
+        placed.addEventListener('dragstart', e => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', value);
+          e.dataTransfer.setData('application/x-nld-origin', 'line');
+        });
+        drop.appendChild(placed);
+      });
+
+      // The original four tokens never change DOM order. Used ones are merely
+      // hidden, so returning one to the bank restores its original position.
+      bankTokens.forEach(token => {
+        token.classList.toggle('used', Object.prototype.hasOwnProperty.call(placements, token.dataset.value));
+        token.classList.toggle('selected', selected === token.dataset.value && !token.classList.contains('used'));
+      });
+      sync();
+    };
+
+    const place = (value, pos) => {
+      if (!value) return;
+      // If this tick is occupied, return that fraction to the bank.
+      Object.keys(placements).forEach(key => {
+        if (key !== value && String(placements[key]) === String(pos)) delete placements[key];
+      });
+      placements[value] = pos;
+      selected = null;
+      render();
+    };
+
+    const returnToBank = value => {
+      if (!value) return;
+      delete placements[value];
+      if (selected === value) selected = null;
+      render();
+    };
+
+    bankTokens.forEach(token => {
+      token.addEventListener('dragstart', e => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', token.dataset.value);
+        e.dataTransfer.setData('application/x-nld-origin', 'bank');
+      });
+      token.addEventListener('click', () => {
+        if (token.classList.contains('used')) return;
+        selected = selected === token.dataset.value ? null : token.dataset.value;
+        render();
+      });
+    });
+
+    drops.forEach(drop => {
+      drop.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+      drop.addEventListener('drop', e => {
+        e.preventDefault();
+        place(e.dataTransfer.getData('text/plain'), drop.dataset.position);
+      });
+      drop.addEventListener('click', () => { if (selected) place(selected, drop.dataset.position); });
+    });
+
+    // A fraction already on the line can be dragged back into the lower bank.
+    bank.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    bank.addEventListener('drop', e => {
+      e.preventDefault();
+      returnToBank(e.dataTransfer.getData('text/plain'));
+    });
+
+    widget.querySelector('.nld-clear').addEventListener('click', () => {
+      Object.keys(placements).forEach(key => delete placements[key]);
+      selected = null;
+      render();
+    });
+
+    render();
+  });
+
+  document.querySelectorAll('[data-equation-builder]').forEach(widget => {
+    const slots=[...widget.querySelectorAll('.eqb-slot')], hidden=widget.querySelector('.eqb-answer');
+    let values=Array(6).fill(''), selected=null, plant='';
+    const sync=()=>{ hidden.value=(values.some(Boolean)||plant)?JSON.stringify({slots:values,plant}):''; hidden.dispatchEvent(new Event('input',{bubbles:true})); updateNavigationState(); };
+    const render=()=>{slots.forEach((slot,i)=>{slot.textContent=values[i]||'';slot.classList.toggle('filled',!!values[i])});sync()};
+    const put=(slot,value,kind)=>{if(slot.dataset.kind!==kind)return; values[Number(slot.dataset.slot)]=value; render();};
+    widget.querySelectorAll('.eqb-token').forEach(token=>{
+      token.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',JSON.stringify({value:token.dataset.value,kind:token.dataset.kind}))});
+      token.addEventListener('click',()=>{widget.querySelectorAll('.eqb-token').forEach(t=>t.classList.remove('selected'));token.classList.add('selected');selected={value:token.dataset.value,kind:token.dataset.kind}});
+    });
+    slots.forEach(slot=>{slot.addEventListener('dragover',e=>e.preventDefault());slot.addEventListener('drop',e=>{e.preventDefault();try{const x=JSON.parse(e.dataTransfer.getData('text/plain'));put(slot,x.value,x.kind)}catch(_){}});slot.addEventListener('click',()=>{if(selected)put(slot,selected.value,selected.kind)});});
+    widget.querySelectorAll('.eqb-plants input').forEach(r=>r.addEventListener('change',()=>{plant=r.value;sync()}));
+    widget.querySelector('.eqb-clear').addEventListener('click',()=>{values=Array(6).fill('');plant='';selected=null;widget.querySelectorAll('.eqb-token').forEach(t=>t.classList.remove('selected'));widget.querySelectorAll('.eqb-plants input').forEach(r=>r.checked=false);render()});
+  });
+
+  document.querySelectorAll('[data-grid-drawing]').forEach(widget => {
+    const svg = widget.querySelector('.grid-drawing-svg');
+    const lineLayer = widget.querySelector('.grid-user-lines');
+    const previewLayer = widget.querySelector('.grid-preview');
+    const hidden = widget.querySelector('.grid-drawing-answer');
+    const widthSelect = widget.querySelector('.grid-line-width');
+    let lines = [], redoStack = [], start = null;
+    const NS='http://www.w3.org/2000/svg', ox=30, oy=20, step=20, max=400;
+    const snap = (evt) => {
+      const pt=svg.createSVGPoint(); pt.x=evt.clientX; pt.y=evt.clientY;
+      const p=pt.matrixTransform(svg.getScreenCTM().inverse());
+      const x=Math.max(0,Math.min(max,Math.round((p.x-ox)/step)*step));
+      const y=Math.max(0,Math.min(max,Math.round((p.y-oy)/step)*step));
+      return {x:x/step,y:y/step,px:ox+x,py:oy+y};
+    };
+    const sync=()=>{hidden.value=lines.length?JSON.stringify({lines}):'';hidden.dispatchEvent(new Event('input',{bubbles:true}));updateNavigationState();};
+    const render=()=>{
+      lineLayer.replaceChildren();
+      lines.forEach(l=>{const el=document.createElementNS(NS,'line');el.setAttribute('x1',ox+l.x1*step);el.setAttribute('y1',oy+l.y1*step);el.setAttribute('x2',ox+l.x2*step);el.setAttribute('y2',oy+l.y2*step);el.setAttribute('stroke','#111');el.setAttribute('stroke-width',l.width||2);el.setAttribute('stroke-linecap','round');lineLayer.appendChild(el)});
+      previewLayer.replaceChildren(); sync();
+    };
+    svg.addEventListener('click',evt=>{
+      const p=snap(evt);
+      if(!start){start=p;const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.px);c.setAttribute('cy',p.py);c.setAttribute('r','4');c.setAttribute('fill','#002a5f');previewLayer.replaceChildren(c);return;}
+      if(start.x===p.x&&start.y===p.y){start=null;previewLayer.replaceChildren();return;}
+      lines.push({x1:start.x,y1:start.y,x2:p.x,y2:p.y,width:Number(widthSelect.value)||2}); redoStack=[]; start=null; render();
+    });
+    svg.addEventListener('mousemove',evt=>{
+      if(!start)return; const p=snap(evt); previewLayer.replaceChildren();
+      const l=document.createElementNS(NS,'line');l.setAttribute('x1',start.px);l.setAttribute('y1',start.py);l.setAttribute('x2',p.px);l.setAttribute('y2',p.py);l.setAttribute('stroke','#002a5f');l.setAttribute('stroke-width','2');l.setAttribute('stroke-dasharray','5 4');previewLayer.appendChild(l);
+      const c=document.createElementNS(NS,'circle');c.setAttribute('cx',start.px);c.setAttribute('cy',start.py);c.setAttribute('r','4');c.setAttribute('fill','#002a5f');previewLayer.appendChild(c);
+    });
+    widget.querySelector('[data-grid-action="clear"]').addEventListener('click',()=>{if(lines.length)redoStack.push([...lines]);lines=[];start=null;render()});
+    widget.querySelector('[data-grid-action="undo"]').addEventListener('click',()=>{if(!lines.length)return;redoStack.push(lines.pop());start=null;render()});
+    widget.querySelector('[data-grid-action="redo"]').addEventListener('click',()=>{if(!redoStack.length)return;const item=redoStack.pop();if(Array.isArray(item))lines=item;else lines.push(item);start=null;render()});
+  });
 
   startButton.addEventListener('click', () => {
     if (!nameInput.value.trim()) {
@@ -308,6 +706,8 @@
         const error = question.closest('.mstep-question-box')?.querySelector('.question-error');
         if (error) error.hidden = true;
       }
+      // Re-evaluate Next after every drag/drop change.
+      updateNavigationState();
     };
 
     const clearSelection = () => {

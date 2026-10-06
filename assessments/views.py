@@ -50,7 +50,7 @@ def teacher_set_created(request, public_id):
 
 def teacher_question_bank(request):
     questions = Question.objects.filter(
-        question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE]
+        question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.DRAG_DROP_IMAGE]
     ).prefetch_related("choices").order_by("-id")
     return render(request, "assessments/teacher_question_bank.html", {"questions": questions})
 
@@ -59,7 +59,19 @@ def _choice_formset(question, data=None):
     if not data:
         for i, f in enumerate(fs.forms):
             if f.instance.pk:
-                f.fields["is_correct"].initial = f.instance.value == question.correct_answer
+                if question.question_type == Question.Type.YES_NO_MATRIX:
+                    try:
+                        matrix_expected = json.loads(question.correct_answer or "{}")
+                    except json.JSONDecodeError:
+                        matrix_expected = {}
+                    f.fields["is_correct"].initial = bool(matrix_expected.get(f.instance.value, False))
+                elif question.question_type == Question.Type.MULTI_SELECT:
+                    try:
+                        f.fields["is_correct"].initial = f.instance.value in json.loads(question.correct_answer or "[]")
+                    except json.JSONDecodeError:
+                        f.fields["is_correct"].initial = False
+                else:
+                    f.fields["is_correct"].initial = f.instance.value == question.correct_answer
             else:
                 f.fields["order"].initial = i
                 f.fields["value"].initial = f"choice_{i+1}"
@@ -71,18 +83,25 @@ def _validate_mc(form, fs):
         if cf.cleaned_data and not cf.cleaned_data.get("DELETE") and (cf.cleaned_data.get("text") or "").strip():
             nonblank += 1
             correct += bool(cf.cleaned_data.get("is_correct"))
+    qtype = form.cleaned_data.get("question_type")
     if nonblank < 2:
-        form.add_error(None, "Multiple-choice questions need at least two answer choices.")
-    elif correct != 1:
+        form.add_error(None, "Choice questions need at least two answer choices.")
+        return False
+    if qtype == Question.Type.MULTIPLE_CHOICE and correct != 1:
         form.add_error(None, "Select exactly one correct answer.")
-    return nonblank >= 2 and correct == 1
+        return False
+    if qtype == Question.Type.MULTI_SELECT and correct < 1:
+        form.add_error(None, "Select at least one correct answer.")
+        return False
+    # Yes/No Matrix uses checked = Yes and unchecked = No, so zero checked rows is valid.
+    return True
 
 def _save_question(form, fs):
     q = form.save(commit=False)
     q.drag_config = {}
     q.save()
-    if q.question_type == Question.Type.MULTIPLE_CHOICE:
-        kept, correct_value = [], None
+    if q.question_type in [Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX]:
+        kept, correct_values = [], []
         for i, cf in enumerate(fs.forms):
             if not cf.cleaned_data or cf.cleaned_data.get("DELETE"):
                 continue
@@ -96,9 +115,16 @@ def _save_question(form, fs):
             c.save()
             kept.append(c.id)
             if cf.cleaned_data.get("is_correct"):
-                correct_value = c.value
+                correct_values.append(c.value)
         q.choices.exclude(id__in=kept).delete()
-        q.correct_answer = correct_value or ""
+        
+        if q.question_type == Question.Type.MULTI_SELECT:
+            q.correct_answer = json.dumps(correct_values)
+        elif q.question_type == Question.Type.YES_NO_MATRIX:
+            # For matrix authoring, a checked Correct box means Yes; unchecked means No.
+            q.correct_answer = json.dumps({c.value: (c.value in correct_values) for c in q.choices.filter(id__in=kept)})
+        else:
+            q.correct_answer = correct_values[0] if correct_values else ""
         q.save(update_fields=["correct_answer"])
     else:
         q.choices.all().delete()
@@ -111,27 +137,27 @@ def teacher_question_create(request):
     if request.method == "POST":
         fs_ok = fs.is_valid()
         if form.is_valid() and fs_ok:
-            if form.cleaned_data["question_type"] != Question.Type.MULTIPLE_CHOICE or _validate_mc(form, fs):
+            if form.cleaned_data["question_type"] not in [Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX] or _validate_mc(form, fs):
                 _save_question(form, fs)
                 messages.success(request, "Question added to the Question Bank.")
                 return redirect("teacher_question_bank")
     return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Add New Question","submit_label":"Save Question"})
 
 def teacher_question_edit(request, pk):
-    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE])
+    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE])
     form = TeacherQuestionForm(request.POST or None, instance=q)
     fs = _choice_formset(q, request.POST if request.method == "POST" else None)
     if request.method == "POST":
         fs_ok = fs.is_valid()
         if form.is_valid() and fs_ok:
-            if form.cleaned_data["question_type"] != Question.Type.MULTIPLE_CHOICE or _validate_mc(form, fs):
+            if form.cleaned_data["question_type"] not in [Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX] or _validate_mc(form, fs):
                 _save_question(form, fs)
                 messages.success(request, "Question updated.")
                 return redirect("teacher_question_bank")
     return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Edit Question","submit_label":"Save Changes","question":q})
 
 def teacher_question_delete(request, pk):
-    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE])
+    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE])
     if request.method == "POST":
         if q.questionsetitem_set.exists() or q.answer_set.exists():
             q.is_active = False
@@ -214,6 +240,44 @@ def normalize_numeric(value):
 
 
 def answer_is_correct(question, submitted):
+    if question.question_type == Question.Type.NUMBER_LINE_DRAG:
+        try:
+            payload = json.loads(submitted)
+            expected = json.loads(question.correct_answer or "{}")
+            return payload == expected
+        except (TypeError, json.JSONDecodeError, AttributeError):
+            return False
+    if question.question_type == Question.Type.EQUATION_BUILDER:
+        try:
+            payload = json.loads(submitted)
+            expected = json.loads(question.correct_answer or "{}")
+            return payload == expected
+        except (TypeError, json.JSONDecodeError, AttributeError):
+            return False
+    if question.question_type == Question.Type.GRID_LINE_DRAWING:
+        # Open-response drawing item: preserve the vector answer for teacher review.
+        # It is intentionally not auto-scored yet.
+        try:
+            payload = json.loads(submitted)
+            return False if not payload.get("lines") else False
+        except (TypeError, json.JSONDecodeError, AttributeError):
+            return False
+    if question.question_type == Question.Type.YES_NO_MATRIX:
+        try:
+            submitted_values = json.loads(submitted)
+            expected_values = json.loads(question.correct_answer or "{}")
+            normalized = {str(k): str(v).lower() == "yes" for k, v in submitted_values.items()}
+            expected = {str(k): bool(v) for k, v in expected_values.items()}
+            return normalized == expected
+        except (TypeError, json.JSONDecodeError, AttributeError):
+            return False
+    if question.question_type == Question.Type.MULTI_SELECT:
+        try:
+            submitted_values = json.loads(submitted)
+            expected_values = json.loads(question.correct_answer or "[]")
+            return sorted(submitted_values) == sorted(expected_values)
+        except (TypeError, json.JSONDecodeError):
+            return False
     if question.question_type == Question.Type.DRAG_DROP_IMAGE:
         try:
             placements = json.loads(submitted)
