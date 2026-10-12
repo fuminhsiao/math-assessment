@@ -57,24 +57,56 @@
     <form method="post" id="quiz-form" novalidate>
       {% csrf_token %}
 
-      <div class="mstep-name-overlay" id="name-overlay">
-        <div class="mstep-name-card">
-          <h1>Student Information</h1>
-          <p>Enter your name to begin the assessment.</p>
-          <label for="student_name">Student name</label>
-          <input id="student_name" name="student_name" autocomplete="name" placeholder="Enter your full name" value="{{ request.POST.student_name }}">
-          <p class="inline-error" id="name-error" hidden>Please enter your name before starting.</p>
-          <button type="button" class="mstep-start-button" id="start-button">Start Assessment</button>
-        </div>
-      </div>
-
       <div class="mstep-content-area">
         {% for item in items %}{% with q=item.question %}
           <section class="mstep-question-screen{% if forloop.first %} active{% endif %}" data-screen="question" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
             <div class="mstep-question-box">
-              {% if q.question_type != 'equation_builder' and q.question_type != 'number_line_drag' %}<div class="mstep-question-prompt">{{ q.prompt }}</div>{% endif %}
+              {% if q.question_type != 'equation_builder' and q.question_type != 'number_line_drag' and q.question_type != 'passage_sentence_select' and q.question_type != 'passage_two_part' and q.question_type != 'passage_event_order' and q.question_type != 'passage_choice' and q.question_type != 'passage_multi' %}<div class="mstep-question-prompt">{{ q.prompt }}</div>{% endif %}
 
-              {% if q.question_type == 'multiple_choice' %}
+              {% if q.question_type == 'passage_sentence_select' %}
+                <div class="ela-split-layout" data-ela-sentence-select data-max-select="2">
+                  <article class="ela-passage-pane"><div class="ela-passage-scroll"><div class="ela-passage-kicker">Read the passage. Then answer the questions.</div><div class="ela-passage-text">{{ q.drag_config.passage|linebreaksbr }}</div></div><div class="ela-more">↓ More ↓</div></article>
+                  <section class="ela-response-pane">
+                    <div class="ela-directions">{{ q.prompt|linebreaksbr }}</div>
+                    <div class="ela-select-toolbar" role="toolbar" aria-label="Sentence selection editing tools">
+                      <button type="button" data-ela-action="clear" class="ela-tool mstep-tooltip reset" data-tooltip="Clear All" aria-label="Clear All"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.34315 6.34321L5.07742 5.07748C4.75923 4.75929 4.22182 4.98556 4.2289 5.43104L4.22183 9.38376C4.22183 9.66661 4.44103 9.88581 4.72387 9.88581L8.66953 9.88581C9.115 9.87874 9.34128 9.34134 9.02308 9.02314L7.75736 7.75742C10.0979 5.4169 13.9021 5.4169 16.2426 7.75742C16.8013 8.31603 17.2397 8.96657 17.5225 9.65954C17.671 10.0202 18.0387 10.2323 18.4205 10.2323C19.1418 10.2323 19.6226 9.4969 19.3398 8.83222C18.9579 7.92712 18.3922 7.0786 17.6569 6.34321C14.5314 3.21779 9.46856 3.21779 6.34315 6.34321ZM16.2426 16.2427C13.9021 18.5832 10.0979 18.5832 7.75736 16.2427C7.19874 15.6841 6.76034 15.0335 6.4775 14.3406C6.329 13.98 5.96131 13.7678 5.57947 13.7678C4.85822 13.7678 4.37739 14.5032 4.66023 15.1679C5.04207 16.073 5.60775 16.9215 6.34315 17.6569C9.46856 20.7823 14.5314 20.7823 17.6569 17.6569L18.9226 18.9226C19.2408 19.2408 19.7782 19.0146 19.7711 18.5691L19.7711 14.6234C19.7711 14.3406 19.5519 14.1214 19.2691 14.1214L15.3234 14.1214C14.885 14.1214 14.6587 14.6588 14.9769 14.977L16.2426 16.2427Z" fill="#002A5F"/></svg></button>
+                      <button type="button" data-ela-action="undo" class="ela-tool mstep-tooltip undo" data-tooltip="Undo" aria-label="Undo"><svg width="21" height="8" viewBox="0 0 21 8" fill="none" aria-hidden="true"><path d="M10.5 0C7.85 0 5.45 0.99 3.6 2.6L1.71 0.71C1.08 0.08 0 0.52 0 1.41V7C0 7.55 0.45 8 1 8H6.59C7.48 8 7.93 6.92 7.3 6.29L5.39 4.38C6.78 3.22 8.55 2.5 10.51 2.5C13.67 2.5 16.4 4.34 17.7 7C17.97 7.56 18.61 7.84 19.2 7.64C19.91 7.41 20.27 6.6 19.95 5.92C18.23 2.42 14.65 0 10.5 0Z" fill="#002A5F"/></svg></button>
+                      <button type="button" data-ela-action="redo" class="ela-tool mstep-tooltip redo" data-tooltip="Redo" aria-label="Redo"><svg width="21" height="8" viewBox="0 0 21 8" fill="none" aria-hidden="true"><path d="M9.56763 0C12.2176 0 14.6176 0.99 16.4676 2.6L18.3576 0.71C18.9876 0.08 20.0676 0.52 20.0676 1.41V7C20.0676 7.55 19.6176 8 19.0676 8H13.4776C12.5876 8 12.1376 6.92 12.7676 6.29L14.6776 4.38C13.2876 3.22 11.5176 2.5 9.55763 2.5C6.39763 2.5 3.66763 4.34 2.36763 7C2.09763 7.56 1.45763 7.84 0.867626 7.64C0.157626 7.41 -0.202374 6.6 0.117626 5.92C1.83763 2.42 5.41763 0 9.56763 0Z" fill="#002A5F"/></svg></button>
+                    </div>
+                    <div class="ela-sentence-list">{% for sentence in q.drag_config.sentences %}<button type="button" class="ela-selectable-sentence" data-index="{{ forloop.counter0 }}">{{ sentence }}</button>{% endfor %}</div>
+                    <input type="hidden" name="answer_{{ q.id }}" class="ela-answer" value="">
+                  </section>
+                </div>
+
+              {% elif q.question_type == 'passage_two_part' %}
+                <div class="ela-split-layout" data-ela-two-part>
+                  <article class="ela-passage-pane"><div class="ela-passage-scroll"><div class="ela-passage-kicker">Read the passage. Then answer the questions.</div><div class="ela-passage-text">{{ q.drag_config.passage|linebreaksbr }}</div></div><div class="ela-more">↓ More ↓</div></article>
+                  <section class="ela-response-pane ela-two-part-pane">
+                    <div class="ela-directions">{{ q.prompt|linebreaksbr }}</div>
+                    <div class="ela-part"><h3>Part A</h3><div class="ela-part-prompt">{{ q.drag_config.part_a.prompt }}</div><div class="ela-part-options">{% for c in q.drag_config.part_a.choices %}<label class="mstep-option-row"><input type="radio" name="ela_a_{{ q.id }}" value="{{ forloop.counter0 }}"><span class="mstep-option-letter">{{ forloop.counter|letter_label }}</span><span class="mstep-option-text">{{ c.text }}</span></label>{% endfor %}</div></div>
+                    <div class="ela-part"><h3>Part B</h3><div class="ela-part-prompt">{{ q.drag_config.part_b.prompt }}</div><div class="ela-part-options">{% for c in q.drag_config.part_b.choices %}<label class="mstep-option-row"><input type="radio" name="ela_b_{{ q.id }}" value="{{ forloop.counter0 }}"><span class="mstep-option-letter">{{ forloop.counter|letter_label }}</span><span class="mstep-option-text">{{ c.text }}</span></label>{% endfor %}</div></div>
+                    <input type="hidden" name="answer_{{ q.id }}" class="ela-answer" value="">
+                  </section>
+                </div>
+
+              {% elif q.question_type == 'passage_event_order' or q.question_type == 'passage_choice' or q.question_type == 'passage_multi' %}
+                <div class="ela-split-layout" data-reading-widget data-reading-type="{{ q.question_type }}">
+                  <article class="ela-passage-pane"><div class="ela-passage-scroll"><div class="ela-passage-kicker">Read the passage. Then answer the questions.</div><div class="ela-passage-text">{{ q.drag_config.passage|linebreaksbr }}</div></div><div class="ela-more">↓ More ↓</div></article>
+                  <section class="ela-response-pane">
+                    <div class="ela-directions">{{ q.prompt|linebreaksbr }}</div>
+                    {% if q.question_type == 'passage_event_order' %}
+                      <div class="ela-select-toolbar"><button type="button" data-reading-clear aria-label="Clear All" title="Clear All"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.34315 6.34321L5.07742 5.07748C4.75923 4.75929 4.22182 4.98556 4.2289 5.43104L4.22183 9.38376C4.22183 9.66661 4.44103 9.88581 4.72387 9.88581L8.66953 9.88581C9.115 9.87874 9.34128 9.34134 9.02308 9.02314L7.75736 7.75742C10.0979 5.4169 13.9021 5.4169 16.2426 7.75742C16.8013 8.31603 17.2397 8.96657 17.5225 9.65954C17.671 10.0202 18.0387 10.2323 18.4205 10.2323C19.1418 10.2323 19.6226 9.4969 19.3398 8.83222C18.9579 7.92712 18.3922 7.0786 17.6569 6.34321C14.5314 3.21779 9.46856 3.21779 6.34315 6.34321ZM16.2426 16.2427C13.9021 18.5832 10.0979 18.5832 7.75736 16.2427C7.19874 15.6841 6.76034 15.0335 6.4775 14.3406C6.329 13.98 5.96131 13.7678 5.57947 13.7678C4.85822 13.7678 4.37739 14.5032 4.66023 15.1679C5.04207 16.073 5.60775 16.9215 6.34315 17.6569C9.46856 20.7823 14.5314 20.7823 17.6569 17.6569L18.9226 18.9226C19.2408 19.2408 19.7782 19.0146 19.7711 18.5691L19.7711 14.6234C19.7711 14.3406 19.5519 14.1214 19.2691 14.1214L15.3234 14.1214C14.885 14.1214 14.6587 14.6588 14.9769 14.977L16.2426 16.2427Z" fill="#002A5F"/></svg></button></div>
+                      <div class="ela-event-list">{% for event in q.drag_config.events %}<button type="button" class="ela-event" draggable="true" aria-label="Reorder event" data-value="{{ forloop.counter0 }}">{{ event }}</button>{% endfor %}</div>
+                      <p class="ela-hint">Drag the sentences to arrange the events in order.</p>
+                    {% else %}
+                      
+                      <div class="ela-reading-choices">{% for choice in q.drag_config.choices %}<button type="button" class="ela-reading-choice" data-value="{{ forloop.counter0 }}"><span class="ela-reading-circle">{% if q.question_type == 'passage_choice' %}{{ forloop.counter|letter_label }}{% endif %}</span><span>{{ choice|safe }}</span></button>{% endfor %}</div>
+                    {% endif %}
+                    <input type="hidden" name="answer_{{ q.id }}" class="ela-answer" value="">
+                  </section>
+                </div>
+
+              {% elif q.question_type == 'multiple_choice' %}
                 <div class="mstep-options" role="radiogroup" aria-label="Answer choices">
                   {% for choice in q.choices.all %}
                     <label class="mstep-option-row">
@@ -274,12 +306,8 @@
   const backButton = document.getElementById('back-button');
   const nextButton = document.getElementById('next-button');
   const submitButton = document.getElementById('submit-button');
-  const startButton = document.getElementById('start-button');
-  const nameInput = document.getElementById('student_name');
-  const nameError = document.getElementById('name-error');
-  const nameOverlay = document.getElementById('name-overlay');
   let currentIndex = 0;
-  let started = false;
+  let started = true;
 
   function showQuestion(index) {
     confirmationScreen.classList.remove('active');
@@ -641,29 +669,6 @@
     widget.querySelector('[data-grid-action="redo"]').addEventListener('click',()=>{if(!redoStack.length)return;const item=redoStack.pop();if(Array.isArray(item))lines=item;else lines.push(item);start=null;render()});
   });
 
-  startButton.addEventListener('click', () => {
-    if (!nameInput.value.trim()) {
-      nameError.hidden = false;
-      nameInput.focus();
-      return;
-    }
-    nameError.hidden = true;
-    nameOverlay.hidden = true;
-    started = true;
-    showQuestion(0);
-  });
-
-  nameInput.addEventListener('input', () => {
-    if (nameInput.value.trim()) nameError.hidden = true;
-  });
-
-  nameInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      startButton.click();
-    }
-  });
-
   nextButton.addEventListener('click', () => {
     if (!started || currentIndex >= total) return;
     if (!currentAnswerIsComplete()) return;
@@ -678,7 +683,7 @@
   });
 
   form.addEventListener('submit', (event) => {
-    if (!nameInput.value.trim() || currentIndex !== total) event.preventDefault();
+    if (currentIndex !== total) event.preventDefault();
   });
 
   document.querySelectorAll('.mstep-option-row input').forEach((input) => {
@@ -1015,6 +1020,116 @@
   document.addEventListener('click', e => {
     if (!e.target.closest('.mstep-tool-menu-wrap')) closeToolMenus();
   });
+
+
+  // English sentence-selection item: sentence hover outline, yellow selection, clear/undo/redo.
+  document.querySelectorAll('[data-ela-sentence-select]').forEach(widget => {
+    const answer=widget.querySelector('.ela-answer'), buttons=[...widget.querySelectorAll('.ela-selectable-sentence')], max=Number(widget.dataset.maxSelect||2);
+    let selected=[], undo=[], redo=[];
+    const save=()=>{answer.value=JSON.stringify(selected);answer.dispatchEvent(new Event('change',{bubbles:true}));buttons.forEach((b,i)=>b.classList.toggle('selected',selected.includes(i)));updateNavigationState();};
+    const snapshot=()=>{undo.push([...selected]);redo=[];};
+    buttons.forEach((b,i)=>b.addEventListener('click',()=>{snapshot(); if(selected.includes(i)) selected=selected.filter(x=>x!==i); else { if(selected.length>=max) selected.shift(); selected.push(i); } save();}));
+    widget.querySelector('[data-ela-action="clear"]').addEventListener('click',()=>{snapshot();selected=[];save();});
+    widget.querySelector('[data-ela-action="undo"]').addEventListener('click',()=>{if(!undo.length)return;redo.push([...selected]);selected=undo.pop();save();});
+    widget.querySelector('[data-ela-action="redo"]').addEventListener('click',()=>{if(!redo.length)return;undo.push([...selected]);selected=redo.pop();save();});
+  });
+  document.querySelectorAll('[data-ela-two-part]').forEach(widget => {
+    const answer=widget.querySelector('.ela-answer');
+    const save=()=>{const a=widget.querySelector('input[name^="ela_a_"]:checked'),b=widget.querySelector('input[name^="ela_b_"]:checked');answer.value=(a&&b)?JSON.stringify({a:Number(a.value),b:Number(b.value)}):'';answer.dispatchEvent(new Event('change',{bubbles:true}));updateNavigationState();};
+    widget.querySelectorAll('input[type="radio"]').forEach(r=>r.addEventListener('change',save));
+  });
+
+
+  // Reading comprehension: sortable events, single choice and multiple choice.
+  document.querySelectorAll('[data-reading-widget]').forEach(widget => {
+    const type=widget.dataset.readingType, answer=widget.querySelector('.ela-answer');
+    const choices=[...widget.querySelectorAll('.ela-reading-choice')];
+    const events=widget.querySelector('.ela-event-list');
+    let selected=[];
+    const save=()=>{answer.value=JSON.stringify(type==='passage_event_order'?[...events.children].map(x=>Number(x.dataset.value)):type==='passage_choice'?(selected.length?selected[0]:null):selected.slice().sort((a,b)=>a-b));if(type==='passage_choice'&&!selected.length)answer.value='';if(type==='passage_multi'&&!selected.length)answer.value='';answer.dispatchEvent(new Event('change',{bubbles:true}));updateNavigationState();};
+    choices.forEach((b,i)=>b.addEventListener('click',()=>{if(type==='passage_choice')selected=selected.includes(i)?[]:[i];else selected=selected.includes(i)?selected.filter(v=>v!==i):(selected.length<3?[...selected,i]:selected);choices.forEach((c,j)=>c.classList.toggle('selected',selected.includes(j)));save();}));
+    if(events){
+      let dragging=null, picked=null;
+      const items=[...events.querySelectorAll('.ela-event')];
+      const mark=()=>items.forEach(b=>b.classList.toggle('selected',b===picked));
+      const reorder=(item,target,before=true)=>{
+        if(!item||!target||item===target)return;
+        // Moving an earlier item after a later item must use the original
+        // target position; insertBefore also works for adjacent siblings.
+        events.insertBefore(item,before?target:target.nextSibling);
+        picked=null;mark();save();
+      };
+      const swap=(a,b)=>{
+        if(!a||!b||a===b)return;
+        // Swap nodes regardless of which one appears first in the list.
+        const placeholder=document.createComment('event-swap');
+        events.replaceChild(placeholder,a);
+        events.replaceChild(a,b);
+        events.replaceChild(b,placeholder);
+        picked=null;mark();save();
+      };
+      items.forEach(b=>{
+        b.addEventListener('dragstart',e=>{
+          dragging=b;picked=b;mark();
+          e.dataTransfer.effectAllowed='move';
+          e.dataTransfer.setData('text/plain',b.dataset.value);
+        });
+        b.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';});
+        b.addEventListener('drop',e=>{
+          e.preventDefault();
+          const source=dragging||items.find(x=>x.dataset.value===e.dataTransfer.getData('text/plain'));
+          const rect=b.getBoundingClientRect();
+          reorder(source,b,e.clientY<rect.top+rect.height/2);
+        });
+        b.addEventListener('dragend',()=>{dragging=null;picked=null;mark();});
+        b.addEventListener('click',()=>{
+          if(!picked){picked=b;mark();return;}
+          if(picked===b){picked=null;mark();return;}
+          swap(picked,b);
+        });
+        b.addEventListener('keydown',e=>{
+          if(e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;
+          e.preventDefault();
+          const sibling=e.key==='ArrowUp'?b.previousElementSibling:b.nextElementSibling;
+          if(sibling){reorder(b,sibling,e.key==='ArrowUp');b.focus();}
+        });
+      });
+      events.addEventListener('dragover',e=>e.preventDefault());
+      events.addEventListener('drop',e=>{
+        if(e.target===events&&dragging){e.preventDefault();events.appendChild(dragging);picked=null;mark();save();}
+      });
+    }
+    widget.querySelector('[data-reading-clear]')?.addEventListener('click',()=>{selected=[];choices.forEach(c=>c.classList.remove('selected'));if(events){[...events.children].sort((a,b)=>Number(a.dataset.value)-Number(b.dataset.value)).forEach(x=>events.appendChild(x));}answer.value='';answer.dispatchEvent(new Event('change',{bubbles:true}));updateNavigationState();});
+  });
+  // Match the official reading-item emphasis without changing stored answers.
+  document.querySelectorAll('[data-reading-widget] .ela-directions').forEach(el=>{
+    const escapeHTML = text => text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    let html = escapeHTML(el.textContent || '').replace(/\n/g,'<br>');
+    const kind = el.closest('[data-reading-widget]')?.dataset.readingType;
+    if(kind === 'passage_multi') {
+      html = html.replace(/Pick three choices\./i,'Pick <strong>three</strong> choices.');
+    } else if(kind === 'passage_choice') {
+      html = html.replace(/\bjumble\b/g,'<u>jumble</u>')
+                 .replace(/\bmost likely\b/g,'<strong>most likely</strong>')
+                 .replace(/eased it open(?=\.|\s*<br>)/g,'<u>eased it open</u>');
+    }
+    el.innerHTML = html;
+  });
+  document.querySelectorAll('.ela-passage-text').forEach(el=>{
+    const source=el.textContent || '';
+    if(!source.trim().startsWith('A Few New Neighbors')) return;
+    // Keep the existing passage and its paragraph spacing, while formatting the heading and emphasized text.
+    let html=el.innerHTML;
+    html=html.replace(/^A Few New Neighbors\s*<br\s*\/?>(?:\s*by Kerry McGee\s*<br\s*\/?>)?(?:\s*<br\s*\/?>)*/i,
+      '<div class="ela-story-heading"><strong>A Few New Neighbors</strong><div>by Kerry McGee</div></div>');
+    // Handle the author line even when there is whitespace between tags.
+    html=html.replace(/(<div class="ela-story-heading">[\s\S]*?<\/div><\/div>)\s*by Kerry McGee\s*(?:<br\s*\/?>)*/i,'$1');
+    html=html.replace(/It’s probably looking for somebody to fill the bird feeders/g,'<em>It’s probably looking for somebody to fill the bird feeders</em>');
+    html=html.replace(/\bjumble\b/g,'<u>jumble</u>');
+    html=html.replace(/Highlights for Children\./g,'<em>Highlights for Children</em>.');
+    el.innerHTML=html;
+  });
+  document.querySelectorAll('.ela-passage-pane').forEach(pane=>{const sc=pane.querySelector('.ela-passage-scroll'),more=pane.querySelector('.ela-more');if(!sc||!more)return;const update=()=>{more.hidden=sc.scrollTop+sc.clientHeight>=sc.scrollHeight-8;};sc.addEventListener('scroll',update);requestAnimationFrame(update);});
 
   const exitDialog = document.getElementById('exit-dialog');
   document.getElementById('exit-test-button').addEventListener('click', () => {

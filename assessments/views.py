@@ -35,7 +35,21 @@ def teacher_create_set(request):
             return redirect("teacher_set_created", public_id=question_set.public_id)
     else:
         form = QuestionSetCreateForm()
-    return render(request, "assessments/teacher_create_set.html", {"form": form})
+    available = list(form.fields["questions"].queryset)
+    math_questions = [q for q in available if q.subject == Question.Subject.MATH]
+    english_questions = [q for q in available if q.subject == Question.Subject.ENGLISH]
+    # English reading items that share the same passage are presented as one
+    # passage-level item in Create Assessment, with their subquestions inside.
+    english_groups = []
+    by_passage = {}
+    for q in english_questions:
+        passage = (q.drag_config or {}).get("passage", "")
+        key = passage.strip() or f"question-{q.pk}"
+        if key not in by_passage:
+            by_passage[key] = {"title": "A Few New Neighbors" if "A Few New Neighbors" in passage else q.prompt.splitlines()[0][:90], "passage": passage, "questions": []}
+            english_groups.append(by_passage[key])
+        by_passage[key]["questions"].append(q)
+    return render(request, "assessments/teacher_create_set.html", {"form": form, "math_questions": math_questions, "english_groups": english_groups})
 
 
 def teacher_set_created(request, public_id):
@@ -50,7 +64,7 @@ def teacher_set_created(request, public_id):
 
 def teacher_question_bank(request):
     questions = Question.objects.filter(
-        question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE]
+        question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI]
     ).prefetch_related("choices").order_by("-id")
     return render(request, "assessments/teacher_question_bank.html", {"questions": questions})
 
@@ -99,6 +113,27 @@ def _validate_mc(form, fs):
 def _save_question(form, fs):
     q = form.save(commit=False)
     q.drag_config = {}
+    if q.question_type == Question.Type.PASSAGE_SENTENCE_SELECT:
+        sentence_lines = [x.strip() for x in (form.cleaned_data.get("selectable_sentences") or "").splitlines() if x.strip()]
+        sentences = [x[1:].strip() if x.startswith("*") else x for x in sentence_lines]
+        q.correct_answer = json.dumps([i for i,x in enumerate(sentence_lines) if x.startswith("*")])
+        q.drag_config = {"passage": form.cleaned_data.get("passage_text") or "", "sentences": sentences}
+    elif q.question_type == Question.Type.PASSAGE_TWO_PART:
+        def parse_choices(raw):
+            out=[]
+            for line in (raw or "").splitlines():
+                line=line.strip()
+                if not line: continue
+                correct=line.startswith("*")
+                out.append({"text":line[1:].strip() if correct else line, "correct":correct})
+            return out
+        a_choices=parse_choices(form.cleaned_data.get("part_a_choices")); b_choices=parse_choices(form.cleaned_data.get("part_b_choices"))
+        q.correct_answer = json.dumps({"a": next((i for i,c in enumerate(a_choices) if c["correct"]), -1), "b": next((i for i,c in enumerate(b_choices) if c["correct"]), -1)})
+        q.drag_config = {
+            "passage": form.cleaned_data.get("passage_text") or "",
+            "part_a":{"prompt":form.cleaned_data.get("part_a_prompt") or "", "choices":a_choices},
+            "part_b":{"prompt":form.cleaned_data.get("part_b_prompt") or "", "choices":b_choices},
+        }
     q.save()
     if q.question_type in [Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX]:
         kept, correct_values = [], []
@@ -144,7 +179,7 @@ def teacher_question_create(request):
     return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Add New Question","submit_label":"Save Question"})
 
 def teacher_question_edit(request, pk):
-    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE])
+    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
     form = TeacherQuestionForm(request.POST or None, instance=q)
     fs = _choice_formset(q, request.POST if request.method == "POST" else None)
     if request.method == "POST":
@@ -157,7 +192,7 @@ def teacher_question_edit(request, pk):
     return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Edit Question","submit_label":"Save Changes","question":q})
 
 def teacher_question_delete(request, pk):
-    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE])
+    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
     if request.method == "POST":
         if q.questionsetitem_set.exists() or q.answer_set.exists():
             q.is_active = False
@@ -240,6 +275,11 @@ def normalize_numeric(value):
 
 
 def answer_is_correct(question, submitted):
+    if question.question_type in [Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI]:
+        try:
+            return json.loads(submitted) == json.loads(question.correct_answer or "null")
+        except (TypeError, json.JSONDecodeError, AttributeError):
+            return False
     if question.question_type == Question.Type.NUMBER_LINE_DRAG:
         try:
             payload = json.loads(submitted)
@@ -301,18 +341,13 @@ def student_take_set(request, public_id):
     items = list(question_set.items.all())
 
     if request.method == "POST":
-        student_name = request.POST.get("student_name", "").strip()
-        if not student_name:
-            messages.error(request, "Please enter your name.")
-            return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items})
-
         missing = [item.question.id for item in items if not request.POST.get(f"answer_{item.question.id}", "").strip()]
         if missing:
             messages.error(request, "Please answer every question before submitting.")
             return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items})
 
         with transaction.atomic():
-            submission = Submission.objects.create(question_set=question_set, student_name=student_name)
+            submission = Submission.objects.create(question_set=question_set, student_name="")
             for item in items:
                 question = item.question
                 value = request.POST.get(f"answer_{question.id}", "").strip()

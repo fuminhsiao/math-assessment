@@ -122,3 +122,6 @@ Annotations:
 - Saved free annotations can be edited, moved, or deleted.
 
 Run `python manage.py migrate` after upgrading. Migration `0004_teacher_annotations.py` adds the annotation fields/table.
+
+## English Language Arts question types
+This build adds a subject field (Mathematics / English Language Arts), Question Bank subject toggle, and two ELA passage types: Passage Sentence Select and Passage Two-Part (A/B). Run `python manage.py migrate` and `python manage.py seed_demo` after deploying to create the 8 math + 2 English demo questions.

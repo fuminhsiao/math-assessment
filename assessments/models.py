@@ -12,7 +12,17 @@ class Question(models.Model):
         EQUATION_BUILDER = "equation_builder", "Equation Builder"
         NUMBER_LINE_DRAG = "number_line_drag", "Number Line Drag"
         DRAG_DROP_IMAGE = "drag_drop_image", "Drag and drop on image"
+        PASSAGE_SENTENCE_SELECT = "passage_sentence_select", "Passage Sentence Select"
+        PASSAGE_EVENT_ORDER = "passage_event_order", "Reading Event Sequencing"
+        PASSAGE_CHOICE = "passage_choice", "Reading Multiple Choice"
+        PASSAGE_MULTI = "passage_multi", "Reading Multiple Select"
+        PASSAGE_TWO_PART = "passage_two_part", "Passage Two-Part"
 
+    class Subject(models.TextChoices):
+        MATH = "math", "Mathematics"
+        ENGLISH = "english", "English Language Arts"
+
+    subject = models.CharField("Subject", max_length=20, choices=Subject.choices, default=Subject.MATH)
     prompt = models.TextField("Question prompt")
     question_type = models.CharField("Question type", max_length=30, choices=Type.choices)
     correct_answer = models.CharField("Correct answer", max_length=255, blank=True)
