@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from .forms import ChoiceFormSet, QuestionSetCreateForm, TeacherQuestionForm
 from .models import Answer, FreeAnnotation, Question, QuestionSet, Submission
 
@@ -333,6 +334,7 @@ def answer_is_correct(question, submitted):
     return submitted.strip().lower() == question.correct_answer.strip().lower()
 
 
+@xframe_options_sameorigin
 def student_take_set(request, public_id):
     question_set = get_object_or_404(
         QuestionSet.objects.prefetch_related("items__question__choices"),
