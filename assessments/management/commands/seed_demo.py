@@ -3,30 +3,45 @@ from django.core.management.base import BaseCommand
 from assessments.models import Answer, Choice, Question, QuestionSet, Submission
 
 class Command(BaseCommand):
-    help = "Reset demo data and create exactly one question of each supported type."
+    help = "Safely add missing demo questions without deleting or changing existing data."
 
     def handle(self, *args, **options):
-        # Demo reset: remove old sets/submissions first so protected question references are gone.
-        Answer.objects.all().delete()
-        Submission.objects.all().delete()
-        QuestionSet.objects.all().delete()
-        Question.objects.all().delete()
+        # Add-only seeding: never delete teacher content, assessments or submissions.
+        # Match the stable demo prompt and type; do not overwrite existing rows.
+        created = 0
+        skipped = 0
+        def safe_question_create(**kwargs):
+            nonlocal created, skipped
+            lookup = {"prompt": kwargs["prompt"], "question_type": kwargs["question_type"],
+                      "subject": kwargs.get("subject", Question.Subject.MATH)}
+            existing = Question.objects.filter(**lookup).first()
+            if existing:
+                skipped += 1
+                return existing
+            created += 1
+            return Question.objects.create(**kwargs)
 
-        q1 = Question.objects.create(
+        def safe_choice_create(**kwargs):
+            lookup = {"question": kwargs["question"], "value": kwargs["value"]}
+            if not Choice.objects.filter(**lookup).exists():
+                return Choice.objects.create(**kwargs)
+            return Choice.objects.filter(**lookup).first()
+
+        q1 = safe_question_create(
             prompt="Enter the value of the expression: 2.3 · (4 + 12)",
             question_type=Question.Type.MATHLIVE,
             correct_answer="36.8", order=1, is_active=True,
         )
 
-        q2 = Question.objects.create(
+        q2 = safe_question_create(
             prompt="Which value is equal to 1 1/2 + (-1/2)?",
             question_type=Question.Type.MULTIPLE_CHOICE,
             correct_answer="1", order=2, is_active=True,
         )
         for i, text in enumerate(["-2","-1","0","1"], 1):
-            Choice.objects.create(question=q2, text=text, value=text, order=i)
+            safe_choice_create(question=q2, text=text, value=text, order=i)
 
-        q3 = Question.objects.create(
+        q3 = safe_question_create(
             prompt="Move each ordered pair into the correct quadrant on the grid.",
             question_type=Question.Type.DRAG_DROP_IMAGE,
             correct_answer="", order=3, is_active=True,
@@ -39,7 +54,7 @@ class Command(BaseCommand):
             },
         )
 
-        q4 = Question.objects.create(
+        q4 = safe_question_create(
             prompt="Select all the expressions that are equivalent to 8(t + 4).",
             question_type=Question.Type.MULTI_SELECT,
             correct_answer=json.dumps(["choice_2","choice_5"]),
@@ -53,9 +68,9 @@ class Command(BaseCommand):
             "(8 × t) + (8 × 4)",
         ]
         for i,text in enumerate(choices,1):
-            Choice.objects.create(question=q4, text=text, value=f"choice_{i}", order=i)
+            safe_choice_create(question=q4, text=text, value=f"choice_{i}", order=i)
 
-        q5 = Question.objects.create(
+        q5 = safe_question_create(
             prompt="Does replacing the unknown number with 7 make each equation true? Select Yes or No for each equation.",
             question_type=Question.Type.YES_NO_MATRIX, order=5, is_active=True,
         )
@@ -63,19 +78,19 @@ class Command(BaseCommand):
         expected={}
         for i,(text,yes) in enumerate(matrix_rows,1):
             value=f"row_{i}"
-            Choice.objects.create(question=q5,text=text,value=value,order=i)
+            safe_choice_create(question=q5,text=text,value=value,order=i)
             expected[value]=yes
         q5.correct_answer=json.dumps(expected)
         q5.save(update_fields=["correct_answer"])
 
-        Question.objects.create(
+        safe_question_create(
             prompt="Maya says that a rhombus cannot also be a rectangle.\n\nShow Maya that her statement is not true.\nDraw a rhombus that is also a rectangle.",
             question_type=Question.Type.GRID_LINE_DRAWING, order=6, is_active=True,
             drag_config={"grid_cols":20,"grid_rows":20,"snap":True,"min_lines":1},
         )
 
         # Keep the Render/PostgreSQL demo data in sync with the newer question types.
-        Question.objects.create(
+        safe_question_create(
             prompt=(
                 "Christy has $60 to spend on plants.\n"
                 "She buys a peach tree for $23 and a plum tree for $19.\n\n"
@@ -95,7 +110,7 @@ class Command(BaseCommand):
             order=7, is_active=True,
         )
 
-        Question.objects.create(
+        safe_question_create(
             prompt="Drag each fraction to the correct location on the number line.",
             question_type=Question.Type.NUMBER_LINE_DRAG,
             correct_answer=json.dumps({"4/1":"4","1/4":"0.25","2/4":"0.5","4/4":"1"}),
@@ -176,7 +191,7 @@ Jessie smiled as she and Dad thanked the movers for their help. Then she ran and
 
 “A Few New Neighbors” by Kerry McGee, from Highlights for Children. Copyright © 2013 by Highlights for Children, Inc."""
 
-        Question.objects.create(
+        safe_question_create(
             subject=Question.Subject.ENGLISH,
             prompt="Read the sentence and the directions that follow.\n\nChildren and adults can work together.\n\nChoose the two details that best support this conclusion.",
             question_type=Question.Type.PASSAGE_SENTENCE_SELECT,
@@ -192,7 +207,7 @@ Jessie smiled as she and Dad thanked the movers for their help. Then she ran and
             }
         )
 
-        Question.objects.create(
+        safe_question_create(
             subject=Question.Subject.ENGLISH,
             prompt="This question has two parts. First, answer part A. Then, answer part B.",
             question_type=Question.Type.PASSAGE_TWO_PART,
@@ -236,8 +251,8 @@ Jessie smiled as she and Dad thanked the movers for their help. Then she ran and
              {"choices": ["Jessie is quiet and shy.", "Jessie is able to unlock the door.", "Jessie is nervous to enter the house.", "Jessie is a gentle and thoughtful person."]}, 3),
         ]
         for offset,(kind,prompt,config,correct) in enumerate(english_items,11):
-            Question.objects.create(subject=Question.Subject.ENGLISH,prompt=prompt,question_type=kind,correct_answer=json.dumps(correct),order=offset,is_active=True,drag_config={"passage":passage,**config})
+            safe_question_create(subject=Question.Subject.ENGLISH,prompt=prompt,question_type=kind,correct_answer=json.dumps(correct),order=offset,is_active=True,drag_config={"passage":passage,**config})
 
         self.stdout.write(self.style.SUCCESS(
-            "Question Bank reset: 14 demo questions created (8 Mathematics + 6 English)."
+            f"Demo seed complete: {created} new question(s), {skipped} existing question(s) preserved. Assessments and submissions untouched."
         ))

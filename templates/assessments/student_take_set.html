@@ -293,6 +293,12 @@
     </div>
   </div>
 </div>
+{% if request.GET.teacher_preview %}<style>
+.teacher-preview-mode .mstep-titlebar,.teacher-preview-mode .mstep-question-strip,.teacher-preview-mode .mstep-toolbar-row{display:none!important}
+.teacher-preview-mode .mstep-frame,.teacher-preview-mode .mstep-exam{min-height:0!important}
+.teacher-preview-mode .mstep-content-area{padding:0!important}
+.teacher-preview-mode [data-screen="confirmation"]{display:none!important}
+</style>{% endif %}
 {% endblock %}
 
 {% block scripts %}
@@ -308,6 +314,14 @@
   const submitButton = document.getElementById('submit-button');
   let currentIndex = 0;
   let started = true;
+  const teacherPreview = new URLSearchParams(window.location.search).has('teacher_preview');
+  if (teacherPreview) {
+    document.body.classList.add('teacher-preview-mode');
+    const index = Number(new URLSearchParams(window.location.search).get('preview_index') || 0);
+    window.addEventListener('load', () => showQuestion(Math.max(0, Math.min(total - 1, index))));
+    form.addEventListener('submit', event => event.preventDefault(), true);
+  }
+
 
   function showQuestion(index) {
     confirmationScreen.classList.remove('active');

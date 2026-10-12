@@ -56,11 +56,10 @@ class TeacherQuestionForm(forms.ModelForm):
     ])
     class Meta:
         model = Question
-        fields = ["subject", "question_type", "prompt", "general_annotation", "correct_answer", "is_active"]
-        labels = {"prompt":"Question Text","general_annotation":"General Annotation","correct_answer":"Correct Answer","is_active":"Available in Question Bank"}
+        fields = ["subject", "question_type", "prompt", "correct_answer", "is_active"]
+        labels = {"prompt":"Question Text","correct_answer":"Correct Answer","is_active":"Available in Question Bank"}
         widgets = {
              "prompt": forms.Textarea(attrs={"rows":5,"placeholder":"Enter the question text students will see."}),
-            "general_annotation": forms.Textarea(attrs={"rows":3,"placeholder":"Optional teacher note for the whole question."}),
             "correct_answer": forms.TextInput(attrs={"placeholder":"Example: 36.8","autocomplete":"off"}),
         }
     def __init__(self, *args, **kwargs):
@@ -92,7 +91,7 @@ class ChoiceForm(forms.ModelForm):
     is_correct = forms.BooleanField(required=False, label="Correct")
     class Meta:
         model = Choice
-        fields = ["text", "annotation", "value", "order"]
-        widgets = {"text":forms.TextInput(attrs={"placeholder":"Answer choice"}),"annotation":forms.TextInput(attrs={"placeholder":"Optional choice annotation"}),"value":forms.HiddenInput(),"order":forms.HiddenInput()}
+        fields = ["text", "value", "order"]
+        widgets = {"text":forms.TextInput(attrs={"placeholder":"Answer choice"}),"value":forms.HiddenInput(),"order":forms.HiddenInput()}
 
 ChoiceFormSet = inlineformset_factory(Question, Choice, form=ChoiceForm, extra=0, can_delete=True)

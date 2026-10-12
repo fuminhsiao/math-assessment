@@ -25,22 +25,11 @@
     <div class="mstep-content-area teacher-explanation-content">
       {% for item in items %}{% with q=item.question %}
       <section class="mstep-question-screen{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
-        {% if q.general_annotation %}<aside class="teacher-general-note"><strong>Question Note</strong><div>{{ q.general_annotation|linebreaksbr }}</div></aside>{% endif %}
         <div class="mstep-question-box teacher-annotation-canvas" data-question-id="{{ q.id }}">
-          <div class="mstep-question-prompt">{{ q.prompt }}</div>
-          {% if q.question_type == 'multiple_choice' %}
-          <div class="mstep-options">
-            {% for choice in q.choices.all %}
-            <div class="teacher-choice-block">
-              <div class="mstep-option-row teacher-option-row"><span class="mstep-option-letter">{{ forloop.counter|letter_label }}</span><span class="mstep-option-text">{{ choice.text }}</span>{% if choice.value == q.correct_answer %}<span class="teacher-correct-badge">Correct</span>{% endif %}</div>
-              {% if choice.annotation %}<div class="teacher-choice-annotation">{{ choice.annotation|linebreaksbr }}</div>{% endif %}
-            </div>
-            {% endfor %}
+          <div class="teacher-student-preview-shell">
+            <iframe class="teacher-student-preview" title="Student question preview" src="{% url 'student_take_set' question_set.public_id %}?teacher_preview=1&amp;preview_index={{ forloop.counter0 }}" loading="lazy"></iframe>
+            <div class="teacher-preview-note-layer" aria-hidden="true"></div>
           </div>
-          {% elif q.question_type == 'mathlive' %}
-          <div class="teacher-value-answer"><span>Correct answer</span><strong>{{ q.correct_answer }}</strong></div>
-          {% endif %}
-
           {% for note in q.free_annotations.all %}
           <div class="free-annotation-pin" data-note-id="{{ note.id }}" data-x="{{ note.x }}" data-y="{{ note.y }}">
             <div class="free-note-arrow"></div>
