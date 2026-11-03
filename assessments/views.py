@@ -403,3 +403,42 @@ def teacher_set_results(request, public_id):
         "question_set": question_set,
         "rows": rows,
     })
+
+
+# Diagnostic-only S3 image upload. Staff login required; no database changes.
+from django.contrib.admin.views.decorators import staff_member_required
+from django.conf import settings
+from uuid import uuid4
+import os
+
+@staff_member_required
+@ensure_csrf_cookie
+def teacher_s3_upload_test(request):
+    result = None
+    error = None
+    if request.method == "POST":
+        upload = request.FILES.get("image")
+        allowed = {"image/jpeg": ".jpg", "image/png": ".png", "image/gif": ".gif", "image/webp": ".webp"}
+        if not upload:
+            error = "Please select an image."
+        elif upload.content_type not in allowed:
+            error = "Only JPEG, PNG, GIF, and WebP images are supported."
+        elif upload.size > 5 * 1024 * 1024:
+            error = "Image must be 5 MB or smaller."
+        elif not os.getenv("AWS_STORAGE_BUCKET_NAME"):
+            error = "Missing AWS_STORAGE_BUCKET_NAME environment variable."
+        else:
+            try:
+                import boto3
+                bucket = os.environ["AWS_STORAGE_BUCKET_NAME"]
+                key = f"questions/s3-test/{uuid4().hex}{allowed[upload.content_type]}"
+                client = boto3.client("s3", region_name=os.getenv("AWS_S3_REGION_NAME") or os.getenv("AWS_DEFAULT_REGION") or "us-east-1")
+                client.upload_fileobj(upload, bucket, key, ExtraArgs={"ContentType": upload.content_type})
+                url = client.generate_presigned_url("get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=600)
+                result = {"bucket": bucket, "key": key, "url": url}
+            except Exception as exc:
+                # Avoid disclosing AWS request details or credentials to browser.
+                import logging
+                logging.getLogger(__name__).exception("S3 upload test failed")
+                error = "S3 upload failed. Check server logs, AWS credentials, region, bucket and IAM permissions."
+    return render(request, "assessments/s3_upload_test.html", {"result": result, "error": error})

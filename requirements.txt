@@ -4,3 +4,4 @@ uvicorn
 whitenoise[brotli]
 dj-database-url
 psycopg2-binary
+boto3>=1.35,<2
