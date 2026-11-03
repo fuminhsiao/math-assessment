@@ -27,6 +27,14 @@ class Command(BaseCommand):
                 return Choice.objects.create(**kwargs)
             return Choice.objects.filter(**lookup).first()
 
+        safe_question_create(
+            subject=Question.Subject.MATH_MAP,
+            prompt="What is the total number of objects in the array? Enter the answer in the box.",
+            question_type=Question.Type.MAP_ARRAY_INPUT,
+            correct_answer="12", order=103, is_active=True,
+            drag_config={"directions": "Use the array to answer the question.", "description": "", "image": ""},
+        )
+
         q1 = safe_question_create(
             prompt="Enter the value of the expression: 2.3 · (4 + 12)",
             question_type=Question.Type.MATHLIVE,

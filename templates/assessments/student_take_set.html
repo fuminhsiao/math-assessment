@@ -61,11 +61,22 @@
       <div class="mstep-content-area">
         {% for item in items %}{% with q=item.question %}
           <section class="mstep-question-screen{% if forloop.first %} active{% endif %}" data-screen="question" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
-            {% if q.question_type == 'map_image_choice' %}
+            {% if q.question_type == 'map_image_choice' or q.question_type == 'map_number_symbol' or q.question_type == 'map_array_input' %}
             <div class="map-question" data-map-question>
               <div class="map-tools"><button type="button" class="map-zoom-out" aria-label="Zoom out">−</button><output class="map-zoom-label">100%</output><button type="button" class="map-zoom-in" aria-label="Zoom in">+</button><span class="map-tool-separator"></span>{% for tool in "12345" %}<button type="button" class="map-tool-placeholder" title="SVG and function to be added later" aria-label="Reserved tool {{ tool }}"></button>{% endfor %}</div>
-              <div class="map-zoom-content"><div class="map-directions">{{ q.drag_config.directions|default:'Use the information to answer the question.' }}</div><div class="map-description">{{ q.drag_config.description }}</div><div class="map-prompt">{{ q.prompt }}</div>
-              <div class="map-options">{% with images=map_images|map_lookup:q.id %}{% for letter in "ABCDE" %}<label class="map-option"><input type="radio" name="answer_{{ q.id }}" value="{{ letter }}"><span class="map-letter">{{ letter }}.</span><span class="map-image-holder">{% for image_letter,url in images.items %}{% if image_letter == letter %}<img src="{{ url }}" alt="Option {{ letter }} image">{% endif %}{% endfor %}</span></label>{% endfor %}{% endwith %}</div></div>
+              <div class="map-zoom-content"><div class="map-directions">{{ q.drag_config.directions|default:'Use the information to answer the question.' }}</div><div class="map-description"{% if q.question_type == 'map_array_input' and not q.drag_config.description %} style="display:none"{% endif %}>{{ q.drag_config.description }}</div>{% if q.question_type != 'map_array_input' %}<div class="map-prompt">{{ q.prompt }}</div>{% endif %}
+              {% if q.question_type == 'map_array_input' %}
+              <div class="map-array-image">{% with url=map_array_images|map_lookup:q.id %}{% if url %}<img src="{{ url }}" alt="Array of objects">{% else %}<div class="map-array-placeholder" aria-label="Array image not yet uploaded"></div>{% endif %}{% endwith %}</div>
+              <div class="map-prompt">{{ q.prompt }}</div><div class="map-array-answer"><input type="number" min="0" step="1" inputmode="numeric" name="answer_{{ q.id }}" class="map-array-input" aria-label="Number of objects" autocomplete="off"></div>
+              {% elif q.question_type == 'map_number_symbol' %}
+              <div class="map-placement" data-map-placement>
+                <div class="map-placement-answer" aria-label="Answer slots"><button type="button" class="map-slot" data-slot="0" aria-label="Number answer slot"></button><button type="button" class="map-slot" data-slot="1" aria-label="Currency symbol answer slot"></button></div>
+                <div class="map-token-bank" aria-label="Available numbers and symbols">
+                  {% for token in q.drag_config.tokens %}<button type="button" class="map-token" data-token="{{ token }}" data-token-index="{{ forloop.counter0 }}">{{ token }}</button>{% endfor %}
+                </div>
+                <input type="hidden" name="answer_{{ q.id }}" class="map-placement-answer-input" value="">
+              </div>
+              {% else %}<div class="map-options">{% with images=map_images|map_lookup:q.id %}{% for letter in "ABCDE" %}<label class="map-option"><input type="radio" name="answer_{{ q.id }}" value="{{ letter }}"><span class="map-letter">{{ letter }}.</span><span class="map-image-holder">{% for image_letter,url in images.items %}{% if image_letter == letter %}<img src="{{ url }}" alt="Option {{ letter }} image">{% endif %}{% endfor %}</span></label>{% endfor %}{% endwith %}</div>{% endif %}</div>
             </div>
             {% else %}<div class="mstep-question-box">
               {% if q.question_type != 'equation_builder' and q.question_type != 'number_line_drag' and q.question_type != 'passage_sentence_select' and q.question_type != 'passage_two_part' and q.question_type != 'passage_event_order' and q.question_type != 'passage_choice' and q.question_type != 'passage_multi' %}<div class="mstep-question-prompt">{{ q.prompt }}</div>{% endif %}
@@ -312,13 +323,65 @@
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
  const frame=document.querySelector('.mstep-frame');
- const bar=document.createElement('div');bar.className='map-bottom-bar';bar.innerHTML='<button type="button" class="map-reset">⟳ RESET</button><strong class="map-assessment-title"></strong><button type="button" class="map-next">➜</button>';
- frame.appendChild(bar);bar.querySelector('.map-assessment-title').textContent=JSON.parse(document.getElementById('map-assessment-name').textContent);
- const update=()=>{const active=document.querySelector('.mstep-question-screen.active');const isMap=!!active?.querySelector('[data-map-question]');document.body.classList.toggle('map-active',isMap);};
- const observer=new MutationObserver(update);document.querySelectorAll('.mstep-question-screen').forEach(x=>observer.observe(x,{attributes:true,attributeFilter:['class']}));update();
- bar.querySelector('.map-reset').addEventListener('click',()=>{document.querySelectorAll('.mstep-question-screen.active .map-option input:checked').forEach(x=>x.checked=false)});
- bar.querySelector('.map-next').addEventListener('click',()=>document.getElementById('next-button').click());
- document.querySelectorAll('[data-map-question]').forEach(box=>{let zoom=100;const apply=()=>{box.querySelector('.map-zoom-label').textContent=zoom+'%';box.querySelector('.map-zoom-content').style.zoom=zoom/100};box.querySelector('.map-zoom-out').addEventListener('click',()=>{zoom=Math.max(70,zoom-10);apply()});box.querySelector('.map-zoom-in').addEventListener('click',()=>{zoom=Math.min(150,zoom+10);apply()})});
+ const bar=document.createElement('div');bar.className='map-bottom-bar';
+ bar.innerHTML='<button type="button" class="map-reset">⟳ RESET</button><strong class="map-assessment-title"></strong><button type="button" class="map-next" disabled aria-label="Next question"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+ frame.appendChild(bar);
+ bar.querySelector('.map-assessment-title').textContent=JSON.parse(document.getElementById('map-assessment-name').textContent);
+ const next=bar.querySelector('.map-next');
+ function update(){
+   const active=document.querySelector('.mstep-question-screen.active');
+   const isMap=!!active?.querySelector('[data-map-question]');
+   document.body.classList.toggle('map-active',isMap);
+   if(!isMap)return;
+   const placement=active.querySelector('[data-map-placement]');
+   let ready=false;
+   if(placement){try{const values=JSON.parse(placement.querySelector('.map-placement-answer-input').value||'[]');ready=values.length===2&&values.every(Boolean)}catch(_){}}
+   else if(active.querySelector('.map-array-input'))ready=active.querySelector('.map-array-input').value.trim()!=='';
+   else ready=!!active.querySelector('.map-option input:checked');
+   next.disabled=!ready;
+   next.setAttribute('aria-disabled',String(!ready));
+ }
+ const observer=new MutationObserver(update);
+ document.querySelectorAll('.mstep-question-screen').forEach(x=>observer.observe(x,{attributes:true,attributeFilter:['class']}));
+ bar.querySelector('.map-reset').addEventListener('click',()=>{
+   const active=document.querySelector('.mstep-question-screen.active');
+   active?.querySelectorAll('.map-option input:checked').forEach(x=>{x.checked=false;x.dispatchEvent(new Event('change',{bubbles:true}))});
+   active?.querySelector('[data-map-placement]')?.dispatchEvent(new Event('map-reset'));
+   const arrayInput=active?.querySelector('.map-array-input');if(arrayInput)arrayInput.value='';
+   update();
+ });
+ next.addEventListener('click',()=>{if(!next.disabled)document.getElementById('next-button').click()});
+ document.querySelectorAll('[data-map-question]').forEach(box=>{
+   let zoom=100;const apply=()=>{box.querySelector('.map-zoom-label').textContent=zoom+'%';box.querySelector('.map-zoom-content').style.zoom=zoom/100};
+   box.querySelector('.map-zoom-out').addEventListener('click',()=>{zoom=Math.max(70,zoom-10);apply()});
+   box.querySelector('.map-zoom-in').addEventListener('click',()=>{zoom=Math.min(150,zoom+10);apply()});
+   box.querySelectorAll('.map-option input').forEach(r=>r.addEventListener('change',update));
+   box.querySelectorAll('.map-array-input').forEach(r=>r.addEventListener('input',update));
+ });
+ document.querySelectorAll('[data-map-placement]').forEach(root=>{
+   const slots=[...root.querySelectorAll('.map-slot')];
+   const tokens=[...root.querySelectorAll('.map-token')];
+   const hidden=root.querySelector('.map-placement-answer-input');
+   const values=[null,null];
+   function render(){
+     slots.forEach((slot,i)=>{slot.textContent=values[i]?.dataset.token||'';slot.classList.toggle('filled',!!values[i])});
+     tokens.forEach(token=>{token.hidden=values.includes(token)});
+     hidden.value=values.every(Boolean)?JSON.stringify(values.map(t=>t.dataset.token)):'';
+     hidden.dispatchEvent(new Event('input',{bubbles:true}));
+     update();
+   }
+   tokens.forEach(token=>token.addEventListener('click',()=>{
+     if(values.includes(token))return;
+     const index=values.findIndex(v=>v===null);
+     if(index===-1)return;
+     values[index]=token;
+     render();
+   }));
+   slots.forEach((slot,i)=>slot.addEventListener('click',()=>{values[i]=null;render()}));
+   root.addEventListener('map-reset',()=>{values[0]=null;values[1]=null;render()});
+   render();
+ });
+ update();
 });
 </script>
 <script>

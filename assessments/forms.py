@@ -10,7 +10,9 @@ class QuestionSetCreateForm(forms.Form):
         self.fields["questions"].queryset = Question.objects.filter(
             is_active=True,
             question_type__in=[
+                Question.Type.MAP_ARRAY_INPUT,
                 Question.Type.MAP_IMAGE_CHOICE,
+                Question.Type.MAP_NUMBER_SYMBOL,
                 Question.Type.MATHLIVE,
                 Question.Type.MULTIPLE_CHOICE,
                 Question.Type.MULTI_SELECT,
@@ -36,6 +38,7 @@ class TeacherQuestionForm(forms.ModelForm):
     subject = forms.ChoiceField(label="Subject", choices=Question.Subject.choices)
     map_directions = forms.CharField(label="Directions", required=False, initial="Use the information to answer the question.")
     map_description = forms.CharField(label="Description", required=False, widget=forms.Textarea(attrs={"rows":2}))
+    map_array_image = forms.ImageField(label="Array image (upload in Edit)", required=False)
     map_image_a = forms.ImageField(required=False)
     map_image_b = forms.ImageField(required=False)
     map_image_c = forms.ImageField(required=False)
@@ -48,7 +51,9 @@ class TeacherQuestionForm(forms.ModelForm):
     part_a_choices = forms.CharField(label="Part A choices", required=False, widget=forms.Textarea(attrs={"rows":5,"placeholder":"One choice per line; prefix correct choice with *"}))
     part_b_choices = forms.CharField(label="Part B choices", required=False, widget=forms.Textarea(attrs={"rows":5,"placeholder":"One choice per line; prefix correct choice with *"}))
     question_type = forms.ChoiceField(label="Question Type", choices=[
+        (Question.Type.MAP_ARRAY_INPUT, "MAP Array Numeric Input"),
         (Question.Type.MAP_IMAGE_CHOICE, "MAP Image Choice (A–E)"),
+        (Question.Type.MAP_NUMBER_SYMBOL, "MAP Number & Symbol Placement"),
         (Question.Type.MATHLIVE, "Value Input"),
         (Question.Type.MULTIPLE_CHOICE, "Multiple Choice"),
         (Question.Type.MULTI_SELECT, "Multi-select"),
@@ -94,11 +99,21 @@ class TeacherQuestionForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        if cleaned.get("question_type") == Question.Type.MAP_ARRAY_INPUT:
+            if cleaned.get("subject") != Question.Subject.MATH_MAP:
+                self.add_error("subject", "Array Numeric Input must use Math (MAP).")
+            if not (cleaned.get("correct_answer") or "").strip().isdigit():
+                self.add_error("correct_answer", "Enter the numeric correct answer, e.g. 12.")
         if cleaned.get("question_type") == Question.Type.MAP_IMAGE_CHOICE:
             if cleaned.get("subject") != Question.Subject.MATH_MAP:
                 self.add_error("subject", "MAP Image Choice must use Math (MAP).")
             if (cleaned.get("correct_answer") or "").upper() not in ("A", "B", "C", "D", "E"):
                 self.add_error("correct_answer", "Choose A, B, C, D, or E.")
+        if cleaned.get("question_type") == Question.Type.MAP_NUMBER_SYMBOL:
+            if cleaned.get("subject") != Question.Subject.MATH_MAP:
+                self.add_error("subject", "Number & Symbol Placement must use Math (MAP).")
+            if not (cleaned.get("correct_answer") or "").strip():
+                self.add_error("correct_answer", "Enter the correct answer, for example 17¢.")
         if cleaned.get("question_type") == Question.Type.MATHLIVE and not (cleaned.get("correct_answer") or "").strip():
             self.add_error("correct_answer", "Enter the correct value.")
         return cleaned

@@ -66,7 +66,7 @@ def teacher_set_created(request, public_id):
 
 def teacher_question_bank(request):
     questions = Question.objects.filter(
-        question_type__in=[Question.Type.MAP_IMAGE_CHOICE, Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI]
+        question_type__in=[Question.Type.MAP_ARRAY_INPUT, Question.Type.MAP_IMAGE_CHOICE, Question.Type.MAP_NUMBER_SYMBOL, Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI]
     ).prefetch_related("choices").order_by("-id")
     return render(request, "assessments/teacher_question_bank.html", {"questions": questions})
 
@@ -116,6 +116,14 @@ def _save_question(form, fs):
     q = form.save(commit=False)
     previous_config = dict(q.drag_config or {})
     q.drag_config = {}
+    if q.question_type == Question.Type.MAP_ARRAY_INPUT:
+        q.drag_config = {"directions": form.cleaned_data.get("map_directions") or "Use the information to answer the question.", "description": form.cleaned_data.get("map_description") or "", "image": previous_config.get("image", "")}
+        q.save()
+        upload = form.cleaned_data.get("map_array_image")
+        if upload:
+            q.drag_config["image"] = _map_upload_image(upload, q.pk, "array")
+    if q.question_type == Question.Type.MAP_NUMBER_SYMBOL:
+        q.drag_config = {"directions": form.cleaned_data.get("map_directions") or "Use the information to answer the question.", "description": form.cleaned_data.get("map_description") or "", "tokens": list((previous_config.get("tokens") or ["12", "13", "14", "15", "16", "17", "18", "19", "$", "¢"]))}
     if q.question_type == Question.Type.MAP_IMAGE_CHOICE:
         q.correct_answer = (form.cleaned_data.get("correct_answer") or "").upper()
         q.drag_config = {"directions": form.cleaned_data.get("map_directions") or "Use the information to answer the question.", "description": form.cleaned_data.get("map_description") or "", "images": dict(previous_config.get("images", {}))}
@@ -196,7 +204,7 @@ def teacher_question_create(request):
     return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Add New Question","submit_label":"Save Question", "map_image_fields": [(x, form["map_image_"+x.lower()]) for x in "ABCDE"]})
 
 def teacher_question_edit(request, pk):
-    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MAP_IMAGE_CHOICE, Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
+    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MAP_ARRAY_INPUT, Question.Type.MAP_NUMBER_SYMBOL, Question.Type.MAP_IMAGE_CHOICE, Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
     form = TeacherQuestionForm(request.POST or None, request.FILES or None, instance=q)
     fs = _choice_formset(q, request.POST if request.method == "POST" else None)
     if request.method == "POST":
@@ -212,10 +220,10 @@ def teacher_question_edit(request, pk):
                 else:
                     messages.success(request, "Question updated.")
                     return redirect("teacher_question_bank")
-    return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Edit Question","submit_label":"Save Changes","question":q, "map_image_fields": [(x, form["map_image_"+x.lower()]) for x in "ABCDE"], "map_existing_images": _map_signed_images(q) if q.question_type == Question.Type.MAP_IMAGE_CHOICE else {}})
+    return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Edit Question","submit_label":"Save Changes","question":q, "map_image_fields": [(x, form["map_image_"+x.lower()]) for x in "ABCDE"], "map_existing_images": _map_signed_images(q) if q.question_type == Question.Type.MAP_IMAGE_CHOICE else {}, "map_array_image_url": _map_signed_array_image(q) if q.question_type == Question.Type.MAP_ARRAY_INPUT else ""})
 
 def teacher_question_delete(request, pk):
-    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MAP_IMAGE_CHOICE, Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
+    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MAP_ARRAY_INPUT, Question.Type.MAP_NUMBER_SYMBOL, Question.Type.MAP_IMAGE_CHOICE, Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
     if request.method == "POST":
         if q.questionsetitem_set.exists() or q.answer_set.exists():
             q.is_active = False
@@ -298,6 +306,15 @@ def normalize_numeric(value):
 
 
 def answer_is_correct(question, submitted):
+    if question.question_type == Question.Type.MAP_ARRAY_INPUT:
+        return submitted.strip() == question.correct_answer.strip()
+    if question.question_type == Question.Type.MAP_NUMBER_SYMBOL:
+        try:
+            values = json.loads(submitted)
+            return isinstance(values, list) and len(values) == 2 and "".join(str(x) for x in values) == question.correct_answer.strip()
+        except (TypeError, ValueError):
+            return False
+
     if question.question_type in [Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI]:
         try:
             return json.loads(submitted) == json.loads(question.correct_answer or "null")
@@ -365,13 +382,14 @@ def student_take_set(request, public_id):
         public_id=public_id,
     )
     items = list(question_set.items.all())
+    map_array_images = {item.question_id: _map_signed_array_image(item.question) for item in items if item.question.question_type == Question.Type.MAP_ARRAY_INPUT}
     map_images = {item.question_id if hasattr(item, "question_id") else item.question.id: _map_signed_images(item.question) for item in items if item.question.question_type == Question.Type.MAP_IMAGE_CHOICE}
 
     if request.method == "POST":
         missing = [item.question.id for item in items if not request.POST.get(f"answer_{item.question.id}", "").strip()]
         if missing:
             messages.error(request, "Please answer every question before submitting.")
-            return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items, "map_images": map_images})
+            return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items, "map_images": map_images, "map_array_images": map_array_images})
 
         with transaction.atomic():
             submission = Submission.objects.create(question_set=question_set, student_name="")
@@ -386,7 +404,7 @@ def student_take_set(request, public_id):
                 )
         return redirect("submission_complete", submission_id=submission.id)
 
-    return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items, "map_images": map_images})
+    return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items, "map_images": map_images, "map_array_images": map_array_images})
 
 
 def submission_complete(request, submission_id):
@@ -496,6 +514,19 @@ def _map_upload_image(upload, question_id, letter):
     key = f"questions/map/{question_id}/{letter}-{uuid4().hex}{allowed[upload.content_type]}"
     client.upload_fileobj(upload, bucket, key, ExtraArgs={"ContentType": upload.content_type})
     return key
+
+def _map_signed_array_image(question):
+    import os
+    from django.conf import settings
+    key = (question.drag_config or {}).get("image")
+    bucket = os.getenv("AWS_STORAGE_BUCKET_NAME")
+    if not key or not bucket:
+        return ""
+    import boto3
+    from botocore.config import Config
+    client = boto3.client("s3", region_name=settings.AWS_S3_REGION_NAME,
+                          config=Config(signature_version="s3v4", s3={"addressing_style": "virtual"}))
+    return client.generate_presigned_url("get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=3600)
 
 def _map_signed_images(question):
     import os
