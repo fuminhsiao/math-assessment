@@ -10,6 +10,7 @@ class QuestionSetCreateForm(forms.Form):
         self.fields["questions"].queryset = Question.objects.filter(
             is_active=True,
             question_type__in=[
+                Question.Type.MAP_IMAGE_CHOICE,
                 Question.Type.MATHLIVE,
                 Question.Type.MULTIPLE_CHOICE,
                 Question.Type.MULTI_SELECT,
@@ -33,6 +34,13 @@ class QuestionSetCreateForm(forms.Form):
 
 class TeacherQuestionForm(forms.ModelForm):
     subject = forms.ChoiceField(label="Subject", choices=Question.Subject.choices)
+    map_directions = forms.CharField(label="Directions", required=False, initial="Use the information to answer the question.")
+    map_description = forms.CharField(label="Description", required=False, widget=forms.Textarea(attrs={"rows":2}))
+    map_image_a = forms.ImageField(required=False)
+    map_image_b = forms.ImageField(required=False)
+    map_image_c = forms.ImageField(required=False)
+    map_image_d = forms.ImageField(required=False)
+    map_image_e = forms.ImageField(required=False)
     passage_text = forms.CharField(label="Passage", required=False, widget=forms.Textarea(attrs={"rows":12,"placeholder":"Paste the reading passage here."}))
     selectable_sentences = forms.CharField(label="Selectable sentences", required=False, widget=forms.Textarea(attrs={"rows":6,"placeholder":"One selectable sentence per line."}))
     part_a_prompt = forms.CharField(label="Part A prompt", required=False, widget=forms.Textarea(attrs={"rows":3}))
@@ -40,6 +48,7 @@ class TeacherQuestionForm(forms.ModelForm):
     part_a_choices = forms.CharField(label="Part A choices", required=False, widget=forms.Textarea(attrs={"rows":5,"placeholder":"One choice per line; prefix correct choice with *"}))
     part_b_choices = forms.CharField(label="Part B choices", required=False, widget=forms.Textarea(attrs={"rows":5,"placeholder":"One choice per line; prefix correct choice with *"}))
     question_type = forms.ChoiceField(label="Question Type", choices=[
+        (Question.Type.MAP_IMAGE_CHOICE, "MAP Image Choice (A–E)"),
         (Question.Type.MATHLIVE, "Value Input"),
         (Question.Type.MULTIPLE_CHOICE, "Multiple Choice"),
         (Question.Type.MULTI_SELECT, "Multi-select"),
@@ -65,6 +74,8 @@ class TeacherQuestionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         cfg = self.instance.drag_config or {} if self.instance and self.instance.pk else {}
+        self.fields["map_directions"].initial = cfg.get("directions", "Use the information to answer the question.")
+        self.fields["map_description"].initial = cfg.get("description", "")
         self.fields["passage_text"].initial = cfg.get("passage", "")
         
         try:
@@ -83,6 +94,11 @@ class TeacherQuestionForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        if cleaned.get("question_type") == Question.Type.MAP_IMAGE_CHOICE:
+            if cleaned.get("subject") != Question.Subject.MATH_MAP:
+                self.add_error("subject", "MAP Image Choice must use Math (MAP).")
+            if (cleaned.get("correct_answer") or "").upper() not in ("A", "B", "C", "D", "E"):
+                self.add_error("correct_answer", "Choose A, B, C, D, or E.")
         if cleaned.get("question_type") == Question.Type.MATHLIVE and not (cleaned.get("correct_answer") or "").strip():
             self.add_error("correct_answer", "Enter the correct value.")
         return cleaned

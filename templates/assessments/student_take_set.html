@@ -1,10 +1,11 @@
 {% extends 'assessments/base.html' %}
 {% load assessment_extras static %}
 
-{% block title %}Mathematics Grade 6 Sample Items{% endblock %}
+{% block title %}{{ question_set.title }}{% endblock %}
 {% block body_class %}exam-page mstep-body{% endblock %}
 
 {% block content %}
+{{ question_set.title|json_script:"map-assessment-name" }}
 <section class="mstep-exam" data-total="{{ items|length }}">
   <div class="mstep-frame">
     <header class="mstep-titlebar">
@@ -60,7 +61,13 @@
       <div class="mstep-content-area">
         {% for item in items %}{% with q=item.question %}
           <section class="mstep-question-screen{% if forloop.first %} active{% endif %}" data-screen="question" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
-            <div class="mstep-question-box">
+            {% if q.question_type == 'map_image_choice' %}
+            <div class="map-question" data-map-question>
+              <div class="map-tools"><button type="button" class="map-zoom-out" aria-label="Zoom out">−</button><output class="map-zoom-label">100%</output><button type="button" class="map-zoom-in" aria-label="Zoom in">+</button><span class="map-tool-separator"></span>{% for tool in "12345" %}<button type="button" class="map-tool-placeholder" title="SVG and function to be added later" aria-label="Reserved tool {{ tool }}"></button>{% endfor %}</div>
+              <div class="map-zoom-content"><div class="map-directions">{{ q.drag_config.directions|default:'Use the information to answer the question.' }}</div><div class="map-description">{{ q.drag_config.description }}</div><div class="map-prompt">{{ q.prompt }}</div>
+              <div class="map-options">{% with images=map_images|map_lookup:q.id %}{% for letter in "ABCDE" %}<label class="map-option"><input type="radio" name="answer_{{ q.id }}" value="{{ letter }}"><span class="map-letter">{{ letter }}.</span><span class="map-image-holder">{% for image_letter,url in images.items %}{% if image_letter == letter %}<img src="{{ url }}" alt="Option {{ letter }} image">{% endif %}{% endfor %}</span></label>{% endfor %}{% endwith %}</div></div>
+            </div>
+            {% else %}<div class="mstep-question-box">
               {% if q.question_type != 'equation_builder' and q.question_type != 'number_line_drag' and q.question_type != 'passage_sentence_select' and q.question_type != 'passage_two_part' and q.question_type != 'passage_event_order' and q.question_type != 'passage_choice' and q.question_type != 'passage_multi' %}<div class="mstep-question-prompt">{{ q.prompt }}</div>{% endif %}
 
               {% if q.question_type == 'passage_sentence_select' %}
@@ -256,7 +263,7 @@
 
               <p class="inline-error question-error" hidden>Please provide an answer before continuing.</p>
             </div>
-          </section>
+          {% endif %}</section>
         {% endwith %}{% endfor %}
 
         <section class="mstep-question-screen mstep-confirmation" data-screen="confirmation" aria-hidden="true">
@@ -302,6 +309,18 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const frame=document.querySelector('.mstep-frame');
+ const bar=document.createElement('div');bar.className='map-bottom-bar';bar.innerHTML='<button type="button" class="map-reset">⟳ RESET</button><strong class="map-assessment-title"></strong><button type="button" class="map-next">➜</button>';
+ frame.appendChild(bar);bar.querySelector('.map-assessment-title').textContent=JSON.parse(document.getElementById('map-assessment-name').textContent);
+ const update=()=>{const active=document.querySelector('.mstep-question-screen.active');const isMap=!!active?.querySelector('[data-map-question]');document.body.classList.toggle('map-active',isMap);};
+ const observer=new MutationObserver(update);document.querySelectorAll('.mstep-question-screen').forEach(x=>observer.observe(x,{attributes:true,attributeFilter:['class']}));update();
+ bar.querySelector('.map-reset').addEventListener('click',()=>{document.querySelectorAll('.mstep-question-screen.active .map-option input:checked').forEach(x=>x.checked=false)});
+ bar.querySelector('.map-next').addEventListener('click',()=>document.getElementById('next-button').click());
+ document.querySelectorAll('[data-map-question]').forEach(box=>{let zoom=100;const apply=()=>{box.querySelector('.map-zoom-label').textContent=zoom+'%';box.querySelector('.map-zoom-content').style.zoom=zoom/100};box.querySelector('.map-zoom-out').addEventListener('click',()=>{zoom=Math.max(70,zoom-10);apply()});box.querySelector('.map-zoom-in').addEventListener('click',()=>{zoom=Math.min(150,zoom+10);apply()})});
+});
+</script>
 <script>
 (() => {
   const form = document.getElementById('quiz-form');

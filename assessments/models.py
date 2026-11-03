@@ -4,6 +4,7 @@ from django.db import models
 
 class Question(models.Model):
     class Type(models.TextChoices):
+        MAP_IMAGE_CHOICE = "map_image_choice", "MAP Image Choice (A–E)"
         MATHLIVE = "mathlive", "MathLive response"
         MULTIPLE_CHOICE = "multiple_choice", "Multiple choice"
         MULTI_SELECT = "multi_select", "Multi-select"
@@ -19,8 +20,9 @@ class Question(models.Model):
         PASSAGE_TWO_PART = "passage_two_part", "Passage Two-Part"
 
     class Subject(models.TextChoices):
-        MATH = "math", "Mathematics"
-        ENGLISH = "english", "English Language Arts"
+        MATH = "math", "Math (M-TEST)"
+        MATH_MAP = "math_map", "Math (MAP)"
+        ENGLISH = "english", "English (M-TEST)"
 
     subject = models.CharField("Subject", max_length=20, choices=Subject.choices, default=Subject.MATH)
     prompt = models.TextField("Question prompt")

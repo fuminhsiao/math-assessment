@@ -38,6 +38,7 @@ def teacher_create_set(request):
         form = QuestionSetCreateForm()
     available = list(form.fields["questions"].queryset)
     math_questions = [q for q in available if q.subject == Question.Subject.MATH]
+    map_questions = [q for q in available if q.subject == Question.Subject.MATH_MAP]
     english_questions = [q for q in available if q.subject == Question.Subject.ENGLISH]
     # English reading items that share the same passage are presented as one
     # passage-level item in Create Assessment, with their subquestions inside.
@@ -50,7 +51,7 @@ def teacher_create_set(request):
             by_passage[key] = {"title": "A Few New Neighbors" if "A Few New Neighbors" in passage else q.prompt.splitlines()[0][:90], "passage": passage, "questions": []}
             english_groups.append(by_passage[key])
         by_passage[key]["questions"].append(q)
-    return render(request, "assessments/teacher_create_set.html", {"form": form, "math_questions": math_questions, "english_groups": english_groups})
+    return render(request, "assessments/teacher_create_set.html", {"form": form, "math_questions": math_questions, "map_questions": map_questions, "english_groups": english_groups})
 
 
 def teacher_set_created(request, public_id):
@@ -65,7 +66,7 @@ def teacher_set_created(request, public_id):
 
 def teacher_question_bank(request):
     questions = Question.objects.filter(
-        question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI]
+        question_type__in=[Question.Type.MAP_IMAGE_CHOICE, Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI]
     ).prefetch_related("choices").order_by("-id")
     return render(request, "assessments/teacher_question_bank.html", {"questions": questions})
 
@@ -113,7 +114,16 @@ def _validate_mc(form, fs):
 
 def _save_question(form, fs):
     q = form.save(commit=False)
+    previous_config = dict(q.drag_config or {})
     q.drag_config = {}
+    if q.question_type == Question.Type.MAP_IMAGE_CHOICE:
+        q.correct_answer = (form.cleaned_data.get("correct_answer") or "").upper()
+        q.drag_config = {"directions": form.cleaned_data.get("map_directions") or "Use the information to answer the question.", "description": form.cleaned_data.get("map_description") or "", "images": dict(previous_config.get("images", {}))}
+        q.save()
+        for letter in "ABCDE":
+            upload = form.cleaned_data.get("map_image_" + letter.lower())
+            if upload:
+                q.drag_config["images"][letter] = _map_upload_image(upload, q.pk, letter)
     if q.question_type == Question.Type.PASSAGE_SENTENCE_SELECT:
         sentence_lines = [x.strip() for x in (form.cleaned_data.get("selectable_sentences") or "").splitlines() if x.strip()]
         sentences = [x[1:].strip() if x.startswith("*") else x for x in sentence_lines]
@@ -168,32 +178,44 @@ def _save_question(form, fs):
 
 def teacher_question_create(request):
     q = Question(question_type=Question.Type.MATHLIVE, is_active=True)
-    form = TeacherQuestionForm(request.POST or None, instance=q)
+    form = TeacherQuestionForm(request.POST or None, request.FILES or None, instance=q)
     fs = _choice_formset(q, request.POST if request.method == "POST" else None)
     if request.method == "POST":
         fs_ok = fs.is_valid()
         if form.is_valid() and fs_ok:
             if form.cleaned_data["question_type"] not in [Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX] or _validate_mc(form, fs):
-                _save_question(form, fs)
-                messages.success(request, "Question added to the Question Bank.")
-                return redirect("teacher_question_bank")
-    return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Add New Question","submit_label":"Save Question"})
+                try:
+                    _save_question(form, fs)
+                except Exception:
+                    import logging
+                    logging.getLogger(__name__).exception("Question save or S3 upload failed")
+                    form.add_error(None, "Unable to save image. Verify AWS S3 settings, permissions and image format.")
+                else:
+                    messages.success(request, "Question added to the Question Bank.")
+                    return redirect("teacher_question_bank")
+    return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Add New Question","submit_label":"Save Question", "map_image_fields": [(x, form["map_image_"+x.lower()]) for x in "ABCDE"]})
 
 def teacher_question_edit(request, pk):
-    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
-    form = TeacherQuestionForm(request.POST or None, instance=q)
+    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MAP_IMAGE_CHOICE, Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
+    form = TeacherQuestionForm(request.POST or None, request.FILES or None, instance=q)
     fs = _choice_formset(q, request.POST if request.method == "POST" else None)
     if request.method == "POST":
         fs_ok = fs.is_valid()
         if form.is_valid() and fs_ok:
             if form.cleaned_data["question_type"] not in [Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX] or _validate_mc(form, fs):
-                _save_question(form, fs)
-                messages.success(request, "Question updated.")
-                return redirect("teacher_question_bank")
-    return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Edit Question","submit_label":"Save Changes","question":q})
+                try:
+                    _save_question(form, fs)
+                except Exception:
+                    import logging
+                    logging.getLogger(__name__).exception("Question save or S3 upload failed")
+                    form.add_error(None, "Unable to save image. Verify AWS S3 settings, permissions and image format.")
+                else:
+                    messages.success(request, "Question updated.")
+                    return redirect("teacher_question_bank")
+    return render(request, "assessments/teacher_question_form.html", {"form":form,"choice_formset":fs,"page_title":"Edit Question","submit_label":"Save Changes","question":q, "map_image_fields": [(x, form["map_image_"+x.lower()]) for x in "ABCDE"], "map_existing_images": _map_signed_images(q) if q.question_type == Question.Type.MAP_IMAGE_CHOICE else {}})
 
 def teacher_question_delete(request, pk):
-    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
+    q = get_object_or_404(Question, pk=pk, question_type__in=[Question.Type.MAP_IMAGE_CHOICE, Question.Type.MATHLIVE, Question.Type.MULTIPLE_CHOICE, Question.Type.MULTI_SELECT, Question.Type.YES_NO_MATRIX, Question.Type.GRID_LINE_DRAWING, Question.Type.EQUATION_BUILDER, Question.Type.NUMBER_LINE_DRAG, Question.Type.DRAG_DROP_IMAGE, Question.Type.PASSAGE_SENTENCE_SELECT, Question.Type.PASSAGE_TWO_PART, Question.Type.PASSAGE_EVENT_ORDER, Question.Type.PASSAGE_CHOICE, Question.Type.PASSAGE_MULTI])
     if request.method == "POST":
         if q.questionsetitem_set.exists() or q.answer_set.exists():
             q.is_active = False
@@ -326,6 +348,8 @@ def answer_is_correct(question, submitted):
             return False
         expected = question.drag_config.get("correct", {})
         return placements == expected
+    if question.question_type == Question.Type.MAP_IMAGE_CHOICE:
+        return submitted.strip().upper() == question.correct_answer.strip().upper()
     if question.question_type == Question.Type.MATHLIVE:
         submitted_number = normalize_numeric(submitted)
         correct_number = normalize_numeric(question.correct_answer)
@@ -341,12 +365,13 @@ def student_take_set(request, public_id):
         public_id=public_id,
     )
     items = list(question_set.items.all())
+    map_images = {item.question_id if hasattr(item, "question_id") else item.question.id: _map_signed_images(item.question) for item in items if item.question.question_type == Question.Type.MAP_IMAGE_CHOICE}
 
     if request.method == "POST":
         missing = [item.question.id for item in items if not request.POST.get(f"answer_{item.question.id}", "").strip()]
         if missing:
             messages.error(request, "Please answer every question before submitting.")
-            return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items})
+            return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items, "map_images": map_images})
 
         with transaction.atomic():
             submission = Submission.objects.create(question_set=question_set, student_name="")
@@ -361,7 +386,7 @@ def student_take_set(request, public_id):
                 )
         return redirect("submission_complete", submission_id=submission.id)
 
-    return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items})
+    return render(request, "assessments/student_take_set.html", {"question_set": question_set, "items": items, "map_images": map_images})
 
 
 def submission_complete(request, submission_id):
@@ -430,9 +455,17 @@ def teacher_s3_upload_test(request):
         else:
             try:
                 import boto3
+                from botocore.config import Config
                 bucket = os.environ["AWS_STORAGE_BUCKET_NAME"]
                 key = f"questions/s3-test/{uuid4().hex}{allowed[upload.content_type]}"
-                client = boto3.client("s3", region_name=os.getenv("AWS_S3_REGION_NAME") or os.getenv("AWS_DEFAULT_REGION") or "us-east-1")
+                client = boto3.client(
+                    "s3",
+                    region_name=settings.AWS_S3_REGION_NAME,
+                    config=Config(
+                        signature_version="s3v4",
+                        s3={"addressing_style": "virtual"},
+                    ),
+                )
                 client.upload_fileobj(upload, bucket, key, ExtraArgs={"ContentType": upload.content_type})
                 url = client.generate_presigned_url("get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=600)
                 result = {"bucket": bucket, "key": key, "url": url}
@@ -442,3 +475,37 @@ def teacher_s3_upload_test(request):
                 logging.getLogger(__name__).exception("S3 upload test failed")
                 error = "S3 upload failed. Check server logs, AWS credentials, region, bucket and IAM permissions."
     return render(request, "assessments/s3_upload_test.html", {"result": result, "error": error})
+
+
+def _map_upload_image(upload, question_id, letter):
+    """Private S3 object; only the key is stored, never a temporary URL."""
+    import boto3
+    from botocore.config import Config
+    import os
+    from uuid import uuid4
+    from django.conf import settings
+    from django.core.exceptions import ValidationError
+    allowed = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}
+    if upload.content_type not in allowed or upload.size > 5 * 1024 * 1024:
+        raise ValidationError("Images must be JPEG, PNG, WebP or GIF, up to 5 MB.")
+    bucket = os.getenv("AWS_STORAGE_BUCKET_NAME")
+    if not bucket:
+        raise ValidationError("AWS_STORAGE_BUCKET_NAME is missing. Configure S3 first.")
+    client = boto3.client("s3", region_name=settings.AWS_S3_REGION_NAME,
+                          config=Config(signature_version="s3v4", s3={"addressing_style":"virtual"}))
+    key = f"questions/map/{question_id}/{letter}-{uuid4().hex}{allowed[upload.content_type]}"
+    client.upload_fileobj(upload, bucket, key, ExtraArgs={"ContentType": upload.content_type})
+    return key
+
+def _map_signed_images(question):
+    import os
+    from django.conf import settings
+    keys = (question.drag_config or {}).get("images", {})
+    bucket = os.getenv("AWS_STORAGE_BUCKET_NAME")
+    if not keys or not bucket:
+        return {}
+    import boto3
+    from botocore.config import Config
+    client = boto3.client("s3", region_name=settings.AWS_S3_REGION_NAME,
+                          config=Config(signature_version="s3v4", s3={"addressing_style":"virtual"}))
+    return {letter: client.generate_presigned_url("get_object", Params={"Bucket":bucket,"Key":key}, ExpiresIn=3600) for letter,key in keys.items()}

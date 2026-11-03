@@ -15,3 +15,7 @@ def letter_label(value):
     if 1 <= number <= 26:
         return chr(96 + number)
     return str(number)
+
+@register.filter
+def map_lookup(mapping, key):
+    return (mapping or {}).get(key, {})

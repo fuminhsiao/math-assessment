@@ -2,8 +2,12 @@ from pathlib import Path
 import os
 
 import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load local .env without overwriting real environment variables (e.g. Render).
+load_dotenv(BASE_DIR / ".env", override=False)
 
 # Local development falls back to a demo key. On Render, set DJANGO_SECRET_KEY
 # (or SECRET_KEY) as an environment variable.
@@ -106,3 +110,8 @@ STORAGES = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# S3: use AWS Signature Version 4 for upload and presigned download URLs.
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_S3_ADDRESSING_STYLE = "virtual"
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME") or os.getenv("AWS_DEFAULT_REGION") or "us-east-1"
