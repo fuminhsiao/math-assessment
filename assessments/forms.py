@@ -36,6 +36,11 @@ class QuestionSetCreateForm(forms.Form):
 
 class TeacherQuestionForm(forms.ModelForm):
     subject = forms.ChoiceField(label="Subject", choices=Question.Subject.choices)
+    drag_values = forms.CharField(
+        label="Draggable Values", required=False,
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "(-2,-1); (-2,1); (2,-1); (2,1)"}),
+        help_text="Separate ordered pairs with semicolons or newlines. Plain values may be comma-separated (e.g. 1,1,1,1).",
+    )
     map_directions = forms.CharField(label="Directions", required=False, initial="Use the information to answer the question.")
     map_description = forms.CharField(label="Description", required=False, widget=forms.Textarea(attrs={"rows":2}))
     map_array_image = forms.ImageField(label="Array image (upload in Edit)", required=False)
@@ -79,6 +84,9 @@ class TeacherQuestionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         cfg = self.instance.drag_config or {} if self.instance and self.instance.pk else {}
+        if self.instance.question_type == Question.Type.DRAG_DROP_IMAGE:
+            existing = cfg.get("choices") or []
+            self.fields["drag_values"].initial = "; ".join(str(c.get("label", "")) for c in existing if isinstance(c, dict)) if existing else "(-2,-1); (-2,1); (2,-1); (2,1)"
         self.fields["map_directions"].initial = cfg.get("directions", "Use the information to answer the question.")
         self.fields["map_description"].initial = cfg.get("description", "")
         self.fields["passage_text"].initial = cfg.get("passage", "")
@@ -99,6 +107,24 @@ class TeacherQuestionForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        if cleaned.get("question_type") == Question.Type.DRAG_DROP_IMAGE:
+            import re
+            raw = (cleaned.get("drag_values") or "").strip()
+            # Semicolon/newline delimiters allow coordinate pairs to contain commas.
+            if ";" in raw or "\n" in raw:
+                labels = [v.strip() for v in re.split(r"[;\n]+", raw) if v.strip()]
+            else:
+                # A sequence of ordered pairs is also supported without semicolons.
+                pairs = re.findall(r"\(\s*[+-]?\d+(?:\.\d+)?\s*,\s*[+-]?\d+(?:\.\d+)?\s*\)", raw)
+                if pairs and not re.sub(r"\(\s*[+-]?\d+(?:\.\d+)?\s*,\s*[+-]?\d+(?:\.\d+)?\s*\)|[\s,]+", "", raw):
+                    labels = pairs
+                else:
+                    labels = [v.strip() for v in raw.split(",") if v.strip()]
+            if not labels:
+                labels = ["(-2,-1)", "(-2,1)", "(2,-1)", "(2,1)"]
+            if len(labels) != 4:
+                self.add_error("drag_values", "Enter exactly four draggable values for the four quadrants.")
+            cleaned["parsed_drag_values"] = labels
         if cleaned.get("question_type") == Question.Type.MAP_ARRAY_INPUT:
             if cleaned.get("subject") != Question.Subject.MATH_MAP:
                 self.add_error("subject", "Array Numeric Input must use Math (MAP).")

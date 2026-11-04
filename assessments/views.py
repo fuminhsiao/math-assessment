@@ -116,6 +116,22 @@ def _save_question(form, fs):
     q = form.save(commit=False)
     previous_config = dict(q.drag_config or {})
     q.drag_config = {}
+    if q.question_type == Question.Type.DRAG_DROP_IMAGE:
+        labels = form.cleaned_data.get("parsed_drag_values") or ["(-2,-1)", "(-2,1)", "(2,-1)", "(2,1)"]
+        old_choices = previous_config.get("choices") or []
+        default_ids = ["neg_neg", "neg_pos", "pos_neg", "pos_pos"]
+        choices = []
+        for index, label in enumerate(labels):
+            old = old_choices[index] if index < len(old_choices) and isinstance(old_choices[index], dict) else {}
+            choices.append({"id": str(old.get("id") or default_ids[index]), "label": label})
+        old_correct = previous_config.get("correct") or {}
+        default_correct = {"neg_neg":"q3", "neg_pos":"q2", "pos_neg":"q4", "pos_pos":"q1"}
+        q.drag_config = {
+            **previous_config,
+            "image": "assessments/coordinate-plane.svg",
+            "choices": choices,
+            "correct": old_correct if old_correct else {c["id"]: default_correct[default_ids[i]] for i, c in enumerate(choices)},
+        }
     if q.question_type == Question.Type.MAP_ARRAY_INPUT:
         q.drag_config = {"directions": form.cleaned_data.get("map_directions") or "Use the information to answer the question.", "description": form.cleaned_data.get("map_description") or "", "image": previous_config.get("image", "")}
         q.save()
