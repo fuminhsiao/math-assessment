@@ -257,7 +257,7 @@
               {% elif q.question_type == 'drag_drop_image' %}
                 <div class="mtest-drag-question" data-drag-question="{{ q.id }}">
                   <div class="mtest-image-stage coordinate-quadrant-stage" aria-label="Coordinate plane with four drop zones">
-                    <img src="{% static q.drag_config.image %}" alt="Coordinate plane">
+                    <img src="{% static 'assessments/coordinate-plane.svg' %}" alt="Coordinate plane">
                     <div class="mtest-drop-zone coordinate-quadrant quadrant-2" data-zone-id="q2" aria-label="Quadrant II"></div>
                     <div class="mtest-drop-zone coordinate-quadrant quadrant-1" data-zone-id="q1" aria-label="Quadrant I"></div>
                     <div class="mtest-drop-zone coordinate-quadrant quadrant-3" data-zone-id="q3" aria-label="Quadrant III"></div>
