@@ -1352,3 +1352,136 @@ body.dragging-answer {
 .map-array-input{width:90px;height:37px;border:1px solid #176bb0;background:#fff;font-size:20px;padding:3px 7px;color:#111}
 .map-active .map-bottom-bar .map-next:not(:disabled){background:#2ec3d3;color:#003849;cursor:pointer}
 .map-active .map-bottom-bar .map-next:disabled{background:#dedfe1;color:#6b6f76;cursor:not-allowed}
+
+/* Teacher assessment list: teaching-first actions */
+.assessment-list-wrap{overflow-x:auto;background:#fff;border:1px solid #dce5ec;border-radius:12px;box-shadow:0 2px 10px rgba(0,35,70,.04)}
+.assessment-list-table{width:100%;border-collapse:collapse;text-align:left;min-width:760px}
+.assessment-list-table th{background:#f1f5f9;color:#536679;font-size:.82rem;font-weight:700;padding:16px 18px;border-bottom:1px solid #dce5ec}
+.assessment-list-table td{padding:16px 18px;border-bottom:1px solid #e8eef2;vertical-align:middle}
+.assessment-list-table tbody tr:last-child td{border-bottom:0}
+.assessment-list-table tbody tr:hover{background:#f8fbfd}
+.assessment-list-title{font-weight:700;color:#173b57;max-width:340px}
+.assessment-list-date{color:#617589;white-space:nowrap}
+.assessment-list-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.assessment-list-actions form{margin:0}
+.assessment-action{display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;border:1px solid #cad9e5;border-radius:7px;background:#fff;color:#174968;text-decoration:none;font:inherit;font-size:.86rem;font-weight:600;white-space:nowrap;cursor:pointer}
+.assessment-action:hover{background:#edf6fc}
+.assessment-action.primary{background:#07577d;border-color:#07577d;color:white}
+.assessment-action.primary:hover{background:#064866}
+.assessment-action.danger{color:#ad3542;border-color:#ebc6cb}
+.assessment-action.danger:hover{background:#fff2f3}
+.assessment-edit-page{max-width:920px;margin:0 auto 50px}
+.assessment-edit-form{padding:24px;display:flex;flex-direction:column;gap:14px}
+.assessment-edit-form input[type=text]{width:100%;padding:12px;border:1px solid #c9d5df;border-radius:7px}
+.assessment-edit-questions{max-height:450px;overflow:auto;padding:14px;border:1px solid #e0e8ef;border-radius:8px}
+.assessment-edit-questions label{display:block;margin:8px 0}
+.assessment-edit-actions{display:flex;align-items:center;gap:12px}
+
+/* Assessment list: full-width desktop layout and safe horizontal scrolling */
+body.assessment-list-page main.container {width:min(1360px, calc(100% - 48px));max-width:none}
+.assessment-list-page .assessment-list-table {min-width:1050px;table-layout:auto}
+.assessment-list-page .assessment-list-table th,
+.assessment-list-page .assessment-list-table td {padding:16px 14px}
+.assessment-list-page .assessment-list-table th {white-space:nowrap}
+.assessment-list-page .assessment-list-table th:nth-child(1) {min-width:180px}
+.assessment-list-page .assessment-list-table th:nth-child(2) {min-width:155px}
+.assessment-list-page .assessment-list-table th:nth-child(3) {min-width:95px}
+.assessment-list-page .assessment-list-table th:nth-child(4) {min-width:125px}
+.assessment-list-page .assessment-list-table th:nth-child(5) {min-width:450px}
+.assessment-list-page .assessment-list-table td:nth-child(2) {white-space:nowrap}
+.assessment-list-page .assessment-list-actions {flex-wrap:nowrap;gap:8px}
+.assessment-list-page .assessment-list-actions form {flex:none}
+.assessment-list-page .assessment-action {flex:none}
+@media(max-width:760px) {
+ body.assessment-list-page main.container {width:calc(100% - 24px)}
+ .assessment-list-page .dashboard-header {gap:16px}
+ .assessment-list-page .assessment-list-table {min-width:1050px}
+}
+
+/* Teacher explanation: persistent, movable notes in the left margin */
+.teacher-explanation .mstep-frame{overflow:visible}
+.teacher-explanation .mstep-content-area{overflow:visible}
+.teacher-explanation .mstep-question-screen{overflow:visible}
+.teacher-explanation .teacher-annotation-canvas{overflow:visible}
+.teacher-explanation .free-annotation-pin.teaching-note{width:255px;transform:none;z-index:30;filter:none}
+.teacher-explanation .teaching-note{border:1px solid #cad6e6;border-radius:12px;background:#fff;box-shadow:0 8px 22px rgba(17,47,83,.16);overflow:hidden}
+.teacher-explanation .teaching-note-header{display:flex;align-items:center;gap:9px;padding:11px 13px;background:#eaf2fb;color:#073d71;cursor:grab;touch-action:none;user-select:none}
+.teacher-explanation .teaching-note-header:active{cursor:grabbing}
+.teacher-explanation .teaching-note-number{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;background:#0a578f;color:white;font-size:12px;font-weight:700}
+.teacher-explanation .teaching-note-header strong{flex:1;font-size:14px}
+.teacher-explanation .teaching-note-grip{font-size:20px;color:#577b9e}
+.teacher-explanation .teaching-note .free-note-card{background:#fff;border:0;box-shadow:none;padding:10px 12px}
+.teacher-explanation .teaching-note textarea{box-sizing:border-box;width:100%;min-height:92px;border:1px solid #e0e7f0;border-radius:7px;background:#f9fbfe;color:#24374d;font-size:13px;line-height:1.5;padding:10px;resize:vertical}
+.teacher-explanation .teaching-note textarea:focus{outline:2px solid #77b5e7;outline-offset:1px}
+.teacher-explanation .teaching-note .free-note-actions{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.teacher-explanation .teaching-note-status{font-size:11px;color:#62768b}
+.teacher-explanation .teaching-note .free-note-actions button{background:#075b95;color:white;border:0;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600}
+@media(max-width:1450px){.teacher-explanation .mstep-frame{margin-left:275px;margin-right:12px}}
+@media(max-width:750px){.teacher-explanation .mstep-frame{margin-left:0;margin-right:0}.teacher-explanation .free-annotation-pin.teaching-note{width:190px}}
+
+/* Teaching notes: read-only until Edit is selected. */
+.teacher-explanation .teaching-note textarea[readonly]{background:#fff;border-color:transparent;cursor:default;resize:none;outline:none}
+.teacher-explanation .teaching-note.is-editing textarea{background:#f9fbfe;border-color:#b7cbe2;resize:vertical}
+.teacher-explanation .teaching-note .free-note-actions{justify-content:flex-end}
+.teacher-explanation .teaching-note .free-note-actions button:disabled{opacity:.6;cursor:wait}
+
+/* Warm, restrained yellow notes; keep legibility and make them stand out on gray. */
+.teacher-explanation .free-annotation-pin.teaching-note{
+  background:#fff9e9;border:1px solid #dfc88d;border-radius:12px;
+  box-shadow:0 5px 16px rgba(89,70,29,.18);overflow:hidden;
+}
+.teacher-explanation .teaching-note-header{
+  background:#f5e5b7;color:#594716;border-bottom:1px solid #e4d19d;
+}
+.teacher-explanation .teaching-note-number{background:#8b6c2b;color:#fffdf5}
+.teacher-explanation .teaching-note .free-note-card{background:#fff9e9}
+.teacher-explanation .teaching-note textarea[readonly]{background:#fff9e9;color:#463c2b}
+.teacher-explanation .teaching-note.is-editing textarea{background:#fffdf6;border-color:#c9a95d;color:#463c2b}
+.teacher-explanation .teaching-note textarea:focus{outline:2px solid #d7b76c}
+.teacher-explanation .teaching-note .free-note-actions button{background:#846526;color:#fff;border-radius:7px}
+.teacher-explanation .teaching-note .free-note-actions button:hover{background:#6d511c}
+
+/* Viewport-positioned teacher notes: no parent clipping; only visible on active question. */
+body > .teaching-note.free-annotation-pin{position:fixed!important;z-index:1100!important;transform:none!important;width:255px;box-sizing:border-box;background:#fff9e9;border:1px solid #dfc88d;border-radius:12px;box-shadow:0 5px 16px rgba(89,70,29,.18);overflow:hidden}
+body > .teaching-note .teaching-note-header{display:flex;align-items:center;gap:9px;padding:11px 13px;background:#f5e5b7;color:#594716;cursor:grab;touch-action:none;user-select:none}
+body > .teaching-note .teaching-note-number{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;background:#8b6c2b;color:#fffdf5;font-size:12px;font-weight:700}
+body > .teaching-note .free-note-card{padding:10px 12px;background:#fff9e9;border:0;box-shadow:none}
+body > .teaching-note textarea{box-sizing:border-box;width:100%;min-height:92px;border:1px solid transparent;border-radius:7px;background:#fff9e9;color:#463c2b;font-size:13px;line-height:1.5;padding:10px;resize:none}
+body > .teaching-note.is-editing textarea{background:#fffdf6;border-color:#c9a95d;resize:vertical}
+body > .teaching-note .free-note-actions{display:flex;justify-content:flex-end;margin-top:8px}
+body > .teaching-note .free-note-actions button{background:#846526;color:white;border:0;border-radius:7px;padding:6px 14px;cursor:pointer}
+body > .teaching-note[hidden]{display:none!important}
+
+/* Teacher Explanation: render MAP in its own native student layout, not M-TEST chrome.
+   Question-type detection is per screen, so future renderer families can be added. */
+.teacher-map-explanation .mstep-frame{width:100%;max-width:none}
+.teacher-map-explanation .teacher-explanation-content{padding:0!important;background:#e9edf1}
+.teacher-map-explanation .teacher-map-screen{padding:0!important}
+.teacher-map-explanation .teacher-map-screen .teacher-annotation-canvas{border:0!important;box-shadow:none!important;background:#fff;padding:0!important}
+.teacher-map-explanation .teacher-map-screen .teacher-student-preview-shell{min-height:calc(100vh - 155px)}
+.teacher-map-explanation .teacher-map-screen .teacher-student-preview{height:calc(100vh - 155px);min-height:630px}
+.teacher-map-explanation .teacher-map-screen .mstep-question-box{border:0!important}
+
+/* MAP teacher explanation: independent chrome, never reuse M-TEST header/strip/toolbar. */
+.teacher-map-native-body{background:#e9edf1!important}
+.teacher-map-native{width:100%!important;max-width:none!important;margin:0!important;background:transparent!important}
+.teacher-map-native .mstep-frame{width:min(1200px,calc(100% - 16px))!important;max-width:none!important;margin:auto!important;background:#fff!important;min-height:100vh!important}
+.teacher-map-native-header{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:54px;padding:7px 15px;background:#fff;border-bottom:2px solid #36a4d7;color:#064d75;font-family:Arial,Helvetica,sans-serif}
+.teacher-map-native-heading{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.teacher-map-native-heading strong{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teacher-map-native-heading span{font-size:12px;color:#687684}
+.teacher-map-native-navigation{display:flex;align-items:center;gap:10px;white-space:nowrap;font-size:13px;font-weight:600}
+.teacher-map-native-navigation button{width:38px;height:34px;border:1px solid #b7cdd9;border-radius:4px;background:#f6fafc;color:#07577d;font-size:22px;cursor:pointer}
+.teacher-map-native-navigation button:disabled{opacity:.35;cursor:not-allowed}
+.teacher-map-native-exit{font-size:26px;color:#07577d;text-decoration:none;padding:0 8px}
+.teacher-map-native .teacher-explanation-content{padding:0!important;background:#fff!important;overflow:visible!important}
+.teacher-map-native .mstep-question-screen{padding:0!important}
+.teacher-map-native .teacher-annotation-canvas{border:0!important;box-shadow:none!important;padding:0!important;background:#fff!important}
+.teacher-map-native .teacher-student-preview-shell{min-height:calc(100vh - 60px)!important}
+.teacher-map-native .teacher-student-preview{height:calc(100vh - 60px)!important;min-height:630px!important}
+@media(max-width:650px){.teacher-map-native-header{flex-wrap:wrap}.teacher-map-native-navigation{order:3;width:100%;justify-content:center}.teacher-map-native .teacher-student-preview{min-height:560px!important}}
+
+/* MAP Teacher Explanation: bottom MAP navigation replaces M-TEST navigation. */
+.teacher-map-native .teacher-map-native-header{min-height:44px}
+.teacher-map-native .teacher-student-preview-shell{min-height:calc(100vh - 48px)!important}
+.teacher-map-native .teacher-student-preview{height:calc(100vh - 48px)!important}

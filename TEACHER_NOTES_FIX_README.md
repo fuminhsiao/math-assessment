@@ -1,0 +1,1 @@
+Fix: viewport fixed notes, top aligned 12px gap, no clipping; JSON response handling; expanded coordinate range to allow gray margins. No migration. Existing positions remain unless defaults. Test in local and Render.

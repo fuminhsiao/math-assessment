@@ -316,6 +316,15 @@
 .teacher-preview-mode .mstep-frame,.teacher-preview-mode .mstep-exam{min-height:0!important}
 .teacher-preview-mode .mstep-content-area{padding:0!important}
 .teacher-preview-mode [data-screen="confirmation"]{display:none!important}
+/* Teacher Explanation reuses the real student renderer for every question type.
+   MAP must not inherit the M-TEST question border or lose its MAP content. */
+.teacher-preview-mode.map-active .mstep-question-box{display:block!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;min-height:0!important}
+.teacher-preview-mode.map-active .mstep-question-screen{padding:0!important}
+.teacher-preview-mode.map-active .mstep-exam{width:100%!important;max-width:none!important;margin:0!important}
+.teacher-preview-mode.map-active .mstep-frame{min-height:0!important}
+.teacher-preview-mode.map-active .map-question{min-height:0!important}
+.teacher-preview-mode.map-active .map-bottom-bar{display:flex!important}
+.teacher-preview-mode.map-active .mstep-content-area{overflow:visible!important}
 </style>{% endif %}
 {% endblock %}
 
@@ -350,7 +359,14 @@ document.addEventListener('DOMContentLoaded',()=>{
    const arrayInput=active?.querySelector('.map-array-input');if(arrayInput)arrayInput.value='';
    update();
  });
- next.addEventListener('click',()=>{if(!next.disabled)document.getElementById('next-button').click()});
+ next.addEventListener('click',()=>{
+   if(next.disabled)return;
+   if(new URLSearchParams(window.location.search).has('teacher_preview')){
+     window.parent.postMessage({type:'map-teacher-next'},window.location.origin);
+   }else{
+     document.getElementById('next-button').click();
+   }
+ });
  document.querySelectorAll('[data-map-question]').forEach(box=>{
    let zoom=100;const apply=()=>{box.querySelector('.map-zoom-label').textContent=zoom+'%';box.querySelector('.map-zoom-content').style.zoom=zoom/100};
    box.querySelector('.map-zoom-out').addEventListener('click',()=>{zoom=Math.max(70,zoom-10);apply()});

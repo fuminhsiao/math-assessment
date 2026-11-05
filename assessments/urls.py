@@ -7,6 +7,7 @@ urlpatterns = [
     path("teacher/questions/new/", views.teacher_question_create, name="teacher_question_create"),
     path("teacher/questions/<int:pk>/edit/", views.teacher_question_edit, name="teacher_question_edit"),
     path("teacher/questions/<int:pk>/delete/", views.teacher_question_delete, name="teacher_question_delete"),
+    path("teacher/sets/<uuid:public_id>/edit/", views.teacher_edit_set, name="teacher_edit_set"),
     path("teacher/sets/new/", views.teacher_create_set, name="teacher_create_set"),
     path("teacher/sets/<uuid:public_id>/explain/", views.teacher_explain_set, name="teacher_explain_set"),
     path("teacher/sets/<uuid:public_id>/delete/", views.teacher_delete_set, name="teacher_delete_set"),

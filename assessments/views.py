@@ -23,6 +23,10 @@ def home(request):
         )
         .order_by("-created_at")
     )
+    question_sets = list(question_sets.prefetch_related("items__question"))
+    for question_set in question_sets:
+        subjects = {item.question.subject for item in question_set.items.all()}
+        question_set.subject_label = (dict(Question.Subject.choices).get(next(iter(subjects)), "Unknown") if len(subjects) == 1 else "Mixed" if subjects else "No subject")
     return render(request, "assessments/teacher_home.html", {
         "question_sets": question_sets,
     })
@@ -32,8 +36,12 @@ def teacher_create_set(request):
     if request.method == "POST":
         form = QuestionSetCreateForm(request.POST)
         if form.is_valid():
+            selected_subjects = {q.subject for q in form.cleaned_data["questions"]}
+            if len(selected_subjects) != 1:
+                form.add_error("questions", "An assessment must contain questions from one subject only.")
+        if form.is_valid():
             question_set = form.save()
-            return redirect("teacher_set_created", public_id=question_set.public_id)
+            return redirect("home")
     else:
         form = QuestionSetCreateForm()
     available = list(form.fields["questions"].queryset)
@@ -52,6 +60,61 @@ def teacher_create_set(request):
             english_groups.append(by_passage[key])
         by_passage[key]["questions"].append(q)
     return render(request, "assessments/teacher_create_set.html", {"form": form, "math_questions": math_questions, "map_questions": map_questions, "english_groups": english_groups})
+
+
+def teacher_edit_set(request, public_id):
+    question_set = get_object_or_404(QuestionSet, public_id=public_id)
+    existing_items = list(question_set.items.select_related("question").order_by("order", "id"))
+    existing_ids = [item.question_id for item in existing_items]
+    subjects = {item.question.subject for item in existing_items}
+    subject_choices = dict(Question.Subject.choices)
+    # Existing mixed-subject assessments must be reviewed before changing their questions.
+    fixed_subject = next(iter(subjects)) if len(subjects) == 1 else None
+    mixed_subjects = len(subjects) > 1
+    if request.method == "POST":
+        form = QuestionSetCreateForm(request.POST)
+    else:
+        form = QuestionSetCreateForm(initial={"title": question_set.title, "questions": existing_ids})
+    # Include inactive previously assigned questions, but never expose another subject.
+    available = form.fields["questions"].queryset | Question.objects.filter(pk__in=existing_ids)
+    if fixed_subject:
+        available = available.filter(subject=fixed_subject)
+    form.fields["questions"].queryset = available.distinct()
+    if request.method == "POST":
+        if mixed_subjects:
+            form.add_error(None, "This assessment already contains multiple subjects. Please resolve its existing questions before editing.")
+        elif form.is_valid():
+            selected = list(form.cleaned_data["questions"])
+            selected_subjects = {q.subject for q in selected}
+            if len(selected_subjects) != 1 or (fixed_subject and selected_subjects != {fixed_subject}):
+                form.add_error("questions", "Select questions from only one matching subject.")
+            else:
+                selected_ids = {q.pk for q in selected}
+                ordered_ids = [pk for pk in existing_ids if pk in selected_ids]
+                ordered_ids += [q.pk for q in selected if q.pk not in ordered_ids]
+                with transaction.atomic():
+                    question_set.title = form.cleaned_data["title"]
+                    question_set.save(update_fields=["title"])
+                    question_set.items.exclude(question_id__in=ordered_ids).delete()
+                    current = {item.question_id: item for item in question_set.items.all()}
+                    for index, pk in enumerate(ordered_ids):
+                        if pk in current:
+                            item = current[pk]
+                            if item.order != index:
+                                item.order = index
+                                item.save(update_fields=["order"])
+                        else:
+                            question_set.items.create(question_id=pk, order=index)
+                messages.success(request, "Assessment updated. Existing submissions are retained.")
+                return redirect("home")
+    available_questions = list(form.fields["questions"].queryset.order_by("id"))
+    question_subjects = {q.pk: q.subject for q in available_questions}
+    subject_label = subject_choices.get(fixed_subject, "Mixed" if mixed_subjects else "Select a subject")
+    return render(request, "assessments/teacher_edit_set.html", {
+        "form": form, "question_set": question_set,
+        "subject_label": subject_label, "fixed_subject": fixed_subject,
+        "mixed_subjects": mixed_subjects, "question_subjects": question_subjects,
+    })
 
 
 def teacher_set_created(request, public_id):
@@ -262,9 +325,30 @@ def teacher_explain_set(request, public_id):
         public_id=public_id,
     )
     items = list(question_set.items.all())
+    # Each question has three persistent teaching notes. Preserve existing notes.
+    for item in items:
+        question = item.question
+        existing = list(question.free_annotations.all())
+        # Remove only the exact old sample text; preserve teachers' real notes.
+        old_samples = {"Add your overall explanation here...", "Highlight the key concept or strategy...", "Add a teaching tip or follow-up question..."}
+        for note in existing:
+            if note.text in old_samples:
+                note.text = ""
+                note.save(update_fields=["text"])
+        defaults = [
+            ("", -99.0, -99.0),
+            ("", -99.0, -99.0),
+            ("", -99.0, -99.0),
+        ]
+        for text_value, x, y in defaults[len(existing):]:
+            FreeAnnotation.objects.create(question=question, text=text_value, x=x, y=y)
+    # Refresh prefetched notes after creating defaults.
+    question_set = QuestionSet.objects.prefetch_related("items__question__free_annotations").get(pk=question_set.pk)
+    items = list(question_set.items.all())
     return render(request, "assessments/teacher_explain_set.html", {
         "question_set": question_set,
         "items": items,
+        "map_explanation": bool(items) and all(item.question.subject == "math_map" for item in items),
     })
 
 
@@ -274,7 +358,7 @@ def teacher_free_annotation_create(request, question_id):
     try:
         payload = json.loads(request.body.decode("utf-8"))
         text = str(payload.get("text", "")).strip()
-        x = max(0.0, min(1.0, float(payload.get("x", 0.5))))
+        x = max(-0.45, min(1.0, float(payload.get("x", 0.5))))
         y = max(0.0, min(1.0, float(payload.get("y", 0.5))))
     except (ValueError, TypeError, json.JSONDecodeError):
         return JsonResponse({"ok": False, "error": "Invalid annotation data."}, status=400)
@@ -293,13 +377,11 @@ def teacher_free_annotation_update(request, annotation_id):
         return JsonResponse({"ok": False, "error": "Invalid annotation data."}, status=400)
     if "text" in payload:
         text = str(payload["text"]).strip()
-        if not text:
-            return JsonResponse({"ok": False, "error": "Annotation text cannot be blank."}, status=400)
         note.text = text
     if "x" in payload:
-        note.x = max(0.0, min(1.0, float(payload["x"])))
+        note.x = max(-5.0, min(5.0, float(payload["x"])))
     if "y" in payload:
-        note.y = max(0.0, min(1.0, float(payload["y"])))
+        note.y = max(-5.0, min(5.0, float(payload["y"])))
     note.save()
     return JsonResponse({"ok": True, "id": note.id, "text": note.text, "x": note.x, "y": note.y})
 

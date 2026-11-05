@@ -1,12 +1,18 @@
 {% extends 'assessments/base.html' %}
 {% load assessment_extras static %}
 {% block title %}Teacher Explanation — {{ question_set.title }}{% endblock %}
-{% block body_class %}exam-page mstep-body teacher-explanation-body{% endblock %}
+{% block body_class %}exam-page teacher-explanation-body{% if map_explanation %} teacher-map-native-body{% else %} mstep-body{% endif %}{% endblock %}
 {% block content %}
-<section class="mstep-exam teacher-explanation" data-total="{{ items|length }}">
+<section class="mstep-exam teacher-explanation{% if map_explanation %} teacher-map-native{% endif %}" data-total="{{ items|length }}">
   <div class="mstep-frame">
+    {% if map_explanation %}
+    <header class="teacher-map-native-header">
+      <div class="teacher-map-native-heading"><strong>{{ question_set.title }}</strong><span>Teacher Explanation</span></div>
+      <a class="teacher-map-native-exit" href="{% url 'home' %}" aria-label="Exit explanation">×</a>
+    </header>
+    {% else %}
     <header class="mstep-titlebar">
-      <div class="mstep-title-copy"><div class="mstep-title">Mathematics Grade 6 Sample Items</div><div class="mstep-subtitle">Teacher Explanation</div></div>
+      <div class="mstep-title-copy"><div class="mstep-title">{{ question_set.title }}</div><div class="mstep-subtitle">Teacher Explanation</div></div>
       <a class="mstep-exit" href="{% url 'home' %}" aria-label="Exit explanation" title="Exit"><span aria-hidden="true">×</span></a>
     </header>
     <div class="mstep-question-strip" id="question-strip">Question: 1</div>
@@ -15,25 +21,29 @@
         <button type="button" class="mstep-arrow-button" id="back-button" title="Previous question">←</button>
         <button type="button" class="mstep-arrow-button" id="next-button" title="Next question">→</button>
       </div>
-      <div class="mstep-toolbox teacher-explanation-toolbox" aria-label="Explanation tools">
-        <button type="button" class="mstep-tool-button teacher-add-note-tool" id="add-note-tool" title="Add Annotation" aria-label="Add Annotation">
-          <span aria-hidden="true">＋▱</span><span class="teacher-add-note-label">Add Annotation</span>
-        </button>
-      </div>
+
     </div>
+
+    {% endif %}
 
     <div class="mstep-content-area teacher-explanation-content">
       {% for item in items %}{% with q=item.question %}
-      <section class="mstep-question-screen{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
+      <section class="mstep-question-screen{% if forloop.first %} active{% endif %}{% if q.subject == 'math_map' %} teacher-map-screen{% endif %}" data-index="{{ forloop.counter0 }}" data-question-id="{{ q.id }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
         <div class="mstep-question-box teacher-annotation-canvas" data-question-id="{{ q.id }}">
           <div class="teacher-student-preview-shell">
             <iframe class="teacher-student-preview" title="Student question preview" src="{% url 'student_take_set' question_set.public_id %}?teacher_preview=1&amp;preview_index={{ forloop.counter0 }}" loading="lazy"></iframe>
             <div class="teacher-preview-note-layer" aria-hidden="true"></div>
           </div>
           {% for note in q.free_annotations.all %}
-          <div class="free-annotation-pin" data-note-id="{{ note.id }}" data-x="{{ note.x }}" data-y="{{ note.y }}">
-            <div class="free-note-arrow"></div>
-            <div class="free-note-card"><textarea aria-label="Annotation">{{ note.text }}</textarea><div class="free-note-actions"><button type="button" data-note-action="move">Move</button><button type="button" data-note-action="save">Save</button><button type="button" data-note-action="delete">Delete</button></div></div>
+          <div class="free-annotation-pin teaching-note" data-note-id="{{ note.id }}" data-x="{{ note.x }}" data-y="{{ note.y }}">
+            <div class="teaching-note-header" data-note-action="move" title="Drag to reposition">
+              <span class="teaching-note-number">0{{ forloop.counter }}</span>
+              <strong>{% if forloop.counter == 1 %}General{% elif forloop.counter == 2 %}Key Idea{% elif forloop.counter == 3 %}Teaching Tip{% else %}Additional Note{% endif %}</strong>
+            </div>
+            <div class="free-note-card">
+              <textarea aria-label="Teaching note {{ forloop.counter }}" readonly>{{ note.text }}</textarea>
+              <div class="free-note-actions"><button type="button" data-note-action="edit" aria-label="Edit teaching note">Edit</button></div>
+            </div>
           </div>
           {% endfor %}
         </div>
@@ -47,10 +57,6 @@
   <div class="student-notepad-titlebar" id="notepad-drag-handle"><span>Notepad</span><div class="student-notepad-actions"><button type="button" id="notepad-move" title="Move">✥</button><button type="button" id="notepad-close" title="Close">×</button></div></div>
   <textarea id="student-notepad-text" aria-label="Notepad"></textarea>
 </div>
-<div class="teacher-note-editor" id="teacher-note-editor" hidden>
-  <div class="teacher-note-editor-arrow"></div><textarea id="new-note-text" placeholder="Enter annotation..."></textarea>
-  <div><button type="button" id="save-new-note">Save</button><button type="button" id="cancel-new-note">Cancel</button></div>
-</div>
 {% endblock %}
 {% block scripts %}
 <script>
@@ -63,58 +69,99 @@
   function show(i){
     current=Math.max(0,Math.min(screens.length-1,i));
     screens.forEach((s,n)=>{s.classList.toggle('active',n===current);s.setAttribute('aria-hidden',n===current?'false':'true')});
-    strip.textContent=`Question: ${current+1}`;
-    back.disabled=current===0; next.disabled=current===screens.length-1;
+    if(strip)strip.textContent=`Question: ${current+1}`;
+    if(back)back.disabled=current===0;
+    if(next)next.disabled=current===screens.length-1;
+    document.querySelector('.teacher-explanation').classList.toggle('teacher-map-explanation',screens[current]?.classList.contains('teacher-map-screen'));
+    requestAnimationFrame(()=>window.dispatchEvent(new Event('teacher-notes-layout')));
   }
-  back.onclick=()=>show(current-1); next.onclick=()=>show(current+1); show(0);
-
-  const add=document.getElementById('add-note-tool');
-  const editor=document.getElementById('teacher-note-editor');
-  const nt=document.getElementById('new-note-text');
-  let adding=false, pending=null;
+  if(back)back.onclick=()=>show(current-1);
+  if(next)next.onclick=()=>show(current+1);
+  window.addEventListener('message',event=>{
+    if(event.origin!==window.location.origin || event.data?.type!=='map-teacher-next')return;
+    const active=screens[current];
+    if(event.source!==active?.querySelector('iframe.teacher-student-preview')?.contentWindow)return;
+    if(current<screens.length-1)show(current+1);
+  });
+  show(0);
 
   function csrf(){let m=document.cookie.match(/csrftoken=([^;]+)/);return m?decodeURIComponent(m[1]):''}
   async function post(url,data){
-    let r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrf()},body:JSON.stringify(data)});
-    if(!r.ok) throw new Error((await r.json()).error||'Save failed');
-    return r.json();
+    const r=await fetch(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrf(),'Accept':'application/json'},body:JSON.stringify(data)});
+    const raw=await r.text();let result;
+    try{result=JSON.parse(raw)}catch(_){throw new Error(r.status===403?'Permission or CSRF error (403). Reload and try again.':`Server returned HTTP ${r.status} instead of JSON. Check Django logs.`)}
+    if(!r.ok||result.ok===false)throw new Error(result.error||`Save failed (HTTP ${r.status})`);
+    return result;
   }
-
-  add.onclick=()=>{
-    adding=!adding;
-    document.body.classList.toggle('teacher-adding-note',adding);
-    add.classList.toggle('active',adding);
-    if(!adding){editor.hidden=true;pending=null;}
-  };
-
-  document.querySelectorAll('.teacher-annotation-canvas').forEach(canvas=>{
-    canvas.addEventListener('click',e=>{
-      if(!adding || e.target.closest('.free-annotation-pin')) return;
+  const margin=8, gap=12;
+  function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
+  document.querySelectorAll('.mstep-question-screen').forEach(screen=>{
+    const canvas=screen.querySelector('.teacher-annotation-canvas');
+    const pins=[...screen.querySelectorAll('.teaching-note')];
+    // Sentinel coordinates mark a note as using the universal default.
+    // Position against the VIEWPORT, not the subject-specific question canvas.
+    // This makes M-TEST, MAP, and future interfaces consistent.
+    function layout(){
       const r=canvas.getBoundingClientRect();
-      pending={canvas,x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))};
-      editor.style.left=(e.clientX+14)+'px'; editor.style.top=(e.clientY+8)+'px';
-      editor.hidden=false; nt.value=''; nt.focus(); e.stopPropagation();
+      let offset=0;
+      pins.forEach((pin,i)=>{
+        const defaultPosition=Number(pin.dataset.x)<=-90 && Number(pin.dataset.y)<=-90;
+        if(defaultPosition){
+          const left=margin;
+          const top=clamp(margin+offset,margin,window.innerHeight-pin.offsetHeight-margin);
+          pin.style.left=`${left}px`;pin.style.top=`${top}px`;
+        }else{
+          const left=clamp(r.left+Number(pin.dataset.x)*r.width,margin,window.innerWidth-pin.offsetWidth-margin);
+          const top=clamp(r.top+Number(pin.dataset.y)*r.height,margin,window.innerHeight-pin.offsetHeight-margin);
+          pin.style.left=`${left}px`;pin.style.top=`${top}px`;
+        }
+        offset+=pin.offsetHeight+gap;
+      });
+    }
+    // Move notes out of the iframe/canvas stacking context; they stay visible on gray margins.
+    pins.forEach(pin=>document.body.appendChild(pin));
+    // Only position the visible question; hidden screens have no reliable dimensions.
+    function layoutActive(){if(screen.classList.contains('active'))layout()}
+    layoutActive();window.addEventListener('resize',layoutActive);
+    window.addEventListener('teacher-notes-layout',layoutActive);
+    pins.forEach(pin=>{
+      const id=pin.dataset.noteId,ta=pin.querySelector('textarea'),button=pin.querySelector('[data-note-action="edit"]');
+      let editing=false, moving=false,startX=0,startY=0,left=0,top=0;
+      button.onclick=async()=>{
+        if(!editing){editing=true;ta.readOnly=false;pin.classList.add('is-editing');button.textContent='Save';ta.focus();return}
+        button.disabled=true;button.textContent='Saving…';
+        try{await post(`/teacher/annotations/${id}/update/`,{text:ta.value});editing=false;ta.readOnly=true;pin.classList.remove('is-editing');button.textContent='Edit'}
+        catch(e){button.textContent='Save';alert(e.message)}finally{button.disabled=false}
+      };
+      const handle=pin.querySelector('[data-note-action="move"]');
+      handle.addEventListener('pointerdown',e=>{
+        if(e.button!==0)return;
+        moving=true;startX=e.clientX;startY=e.clientY;left=pin.offsetLeft;top=pin.offsetTop;
+        handle.setPointerCapture(e.pointerId);e.preventDefault();
+      });
+      handle.addEventListener('pointermove',e=>{
+        if(!moving)return;
+        pin.style.left=clamp(left+e.clientX-startX,margin,window.innerWidth-pin.offsetWidth-margin)+'px';
+        pin.style.top=clamp(top+e.clientY-startY,margin,window.innerHeight-pin.offsetHeight-margin)+'px';
+      });
+      handle.addEventListener('pointerup',async()=>{
+        if(!moving)return;moving=false;
+        const r=canvas.getBoundingClientRect();
+        const x=(pin.offsetLeft-r.left)/r.width,y=(pin.offsetTop-r.top)/r.height;
+        try{await post(`/teacher/annotations/${id}/update/`,{x,y});pin.dataset.x=x;pin.dataset.y=y}
+        catch(e){alert(e.message)}
+      });
+      handle.addEventListener('pointercancel',()=>{moving=false;layout()});
     });
+    const observer=new MutationObserver(()=>{
+      const active=screen.classList.contains('active');
+      pins.forEach(p=>p.hidden=!active);
+      if(active)requestAnimationFrame(layoutActive);
+    });
+    observer.observe(screen,{attributes:true,attributeFilter:['class']});
+    pins.forEach(p=>p.hidden=!screen.classList.contains('active'));
   });
 
-  document.getElementById('cancel-new-note').onclick=()=>{editor.hidden=true;pending=null};
-  document.getElementById('save-new-note').onclick=async()=>{
-    if(!pending||!nt.value.trim()) return;
-    const q=pending.canvas.dataset.questionId;
-    try{await post(`/teacher/annotations/question/${q}/create/`,{text:nt.value,x:pending.x,y:pending.y});location.reload()}
-    catch(e){alert(e.message)}
-  };
-
-  document.querySelectorAll('.free-annotation-pin').forEach(pin=>{
-    pin.style.left=(Number(pin.dataset.x)*100)+'%'; pin.style.top=(Number(pin.dataset.y)*100)+'%';
-    const id=pin.dataset.noteId, ta=pin.querySelector('textarea'); let moving=false;
-    pin.querySelector('[data-note-action="save"]').onclick=async()=>{try{await post(`/teacher/annotations/${id}/update/`,{text:ta.value})}catch(e){alert(e.message)}};
-    pin.querySelector('[data-note-action="delete"]').onclick=async()=>{if(!confirm('Delete this annotation?'))return;try{await post(`/teacher/annotations/${id}/delete/`,{});pin.remove()}catch(e){alert(e.message)}};
-    const mb=pin.querySelector('[data-note-action="move"]');
-    mb.onpointerdown=e=>{moving=true;mb.setPointerCapture?.(e.pointerId);e.preventDefault()};
-    mb.onpointermove=e=>{if(!moving)return;const c=pin.closest('.teacher-annotation-canvas'),r=c.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));pin.style.left=(x*100)+'%';pin.style.top=(y*100)+'%';pin.dataset.x=x;pin.dataset.y=y};
-    mb.onpointerup=async()=>{if(!moving)return;moving=false;try{await post(`/teacher/annotations/${id}/update/`,{x:+pin.dataset.x,y:+pin.dataset.y})}catch(e){alert(e.message)}};
-  });
 })();
 </script>
 {% endblock %}

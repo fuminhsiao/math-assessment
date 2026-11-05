@@ -1,0 +1,22 @@
+{% extends 'assessments/base.html' %}
+{% block title %}Edit Assessment{% endblock %}
+{% block content %}
+<section class="assessment-edit-page">
+  <p class="eyebrow">Teacher Portal</p><h1>Edit Assessment</h1>
+  <p>Update the title and included questions. Previously submitted student answers remain stored.</p>
+  <form method="post" class="card assessment-edit-form">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <label for="{{ form.title.id_for_label }}"><strong>Assessment Title</strong></label>
+    {{ form.title }}{{ form.title.errors }}
+    <h2>Questions</h2><p><strong>Subject:</strong> {{ subject_label }}</p><p>Select questions to include. Existing questions retain their order; new questions are added afterward.</p>
+    {{ form.questions.errors }}
+    {% if mixed_subjects %}<p class="errorlist">This assessment contains questions from multiple subjects. Please correct its subject assignments before editing.</p>{% endif %}
+    <div class="assessment-edit-questions">
+      {% for checkbox in form.questions %}
+        <div class="assessment-edit-question-item">{{ checkbox }}</div>
+      {% empty %}<p>No questions are available for this subject.</p>{% endfor %}
+    </div>
+    <div class="assessment-edit-actions"><button class="button-link" type="submit" {% if mixed_subjects %}disabled{% endif %}>Save Changes</button><a class="assessment-action" href="{% url 'home' %}">Cancel</a></div>
+  </form>
+</section>
+{% endblock %}
